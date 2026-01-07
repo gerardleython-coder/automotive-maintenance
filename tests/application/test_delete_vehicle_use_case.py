@@ -1,11 +1,13 @@
 """Tests for DeleteVehicleUseCase - Application layer."""
 
+from datetime import datetime
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.application.use_cases.delete_vehicle_use_case import DeleteVehicleUseCase
-from src.domain.entities.maintenance_alert import MaintenanceAlert
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 from src.domain.entities.vehicle import Vehicle
 from src.domain.exceptions.vehicle_not_found_exception import (
     VehicleNotFoundException,
@@ -110,22 +112,25 @@ class TestDeleteVehicleUseCase:
 
         # Create multiple alerts for the vehicle
         alert1 = MaintenanceAlert(
+            id="A-001",
             vehicle_id="V-777",
-            alert_type="BASIC",
-            mileage_threshold=10000,
-            message="Mantenimiento básico",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=10000,
+            timestamp=datetime.now(),
         )
         alert2 = MaintenanceAlert(
+            id="A-002",
             vehicle_id="V-777",
-            alert_type="MAJOR",
-            mileage_threshold=50000,
-            message="Mantenimiento mayor",
+            alert_type=AlertType.MAJOR_MAINTENANCE,
+            mileage=50000,
+            timestamp=datetime.now(),
         )
         alert3 = MaintenanceAlert(
+            id="A-003",
             vehicle_id="V-777",
-            alert_type="CRITICAL",
-            mileage_threshold=100000,
-            message="Mantenimiento crítico",
+            alert_type=AlertType.CRITICAL_THRESHOLD,
+            mileage=100000,
+            timestamp=datetime.now(),
         )
         alert_repository.save(alert1)
         alert_repository.save(alert2)
