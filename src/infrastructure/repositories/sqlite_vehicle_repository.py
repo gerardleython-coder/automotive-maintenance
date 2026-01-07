@@ -3,6 +3,7 @@
 from sqlalchemy.orm import Session
 
 from src.domain.entities.vehicle import Vehicle
+from src.domain.exceptions.vehicle_not_found_exception import VehicleNotFoundException
 from src.domain.ports.vehicle_repository import VehicleRepository
 from src.infrastructure.database.models import VehicleModel
 
@@ -107,3 +108,23 @@ class SqliteVehicleRepository(VehicleRepository):
         """
         vehicle_models = self._db.query(VehicleModel).all()
         return self._to_entities(vehicle_models)
+
+    def delete(self, vehicle_id: str) -> None:
+        """
+        Delete vehicle from database by ID.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle to delete
+
+        Raises:
+            VehicleNotFoundException: If vehicle not found
+        """
+        vehicle_model = (
+            self._db.query(VehicleModel).filter_by(id=vehicle_id).first()
+        )
+
+        if vehicle_model is None:
+            raise VehicleNotFoundException(f"Vehículo con ID {vehicle_id} no encontrado")
+
+        self._db.delete(vehicle_model)
+        self._db.commit()
