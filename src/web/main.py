@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.application.use_cases.delete_vehicle_use_case import DeleteVehicleUseCase
 from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase
 from src.application.use_cases.register_vehicle_use_case import RegisterVehicleUseCase
 from src.application.use_cases.update_vehicle_mileage_use_case import (
@@ -197,7 +198,7 @@ def get_vehicle(vehicle_id: str):
             model=vehicle.model,
             current_mileage=vehicle.current_mileage
         )
-    except ValueError as e:
+    except VehicleNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
@@ -274,3 +275,29 @@ def get_vehicle_alerts(vehicle_id: str):
         )
         for alert in vehicle_alerts
     ]
+
+
+@app.delete(
+    "/vehicles/{vehicle_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_vehicle(vehicle_id: str):
+    """
+    Delete a vehicle by ID.
+
+    This operation will cascade and delete all associated alerts automatically.
+
+    Args:
+        vehicle_id: Unique identifier of the vehicle to delete
+
+    Raises:
+        HTTPException: 404 if vehicle not found
+
+    Returns:
+        204 No Content on successful deletion
+    """
+    try:
+        use_case = DeleteVehicleUseCase(vehicle_repository=get_vehicle_repository())
+        use_case.execute(vehicle_id=vehicle_id)
+    except VehicleNotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
