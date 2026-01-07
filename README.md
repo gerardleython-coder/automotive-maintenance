@@ -8,11 +8,13 @@ Sistema que implementa **Arquitectura Hexagonal** con **TDD estricto** para gest
 
 ## Características
 
-- ✓ Gestión de vehículos y kilometraje
+- ✓ Gestión completa de vehículos (CRUD)
+- ✓ Actualización de kilometraje con validaciones
 - ✓ Sistema de alertas automáticas (Patrón Observer)
 - ✓ Reglas de mantenimiento extensibles (Strategy Pattern)
+- ✓ API REST con 5 endpoints
 - ✓ Arquitectura Limpia (Hexagonal)
-- ✓ TDD estricto con cobertura >= 70%
+- ✓ TDD estricto con cobertura >= 85%
 - ✓ Principios SOLID
 
 ## Requisitos
@@ -59,6 +61,16 @@ src/
 └── web/              # API REST (FastAPI)
 ```
 
+### API REST
+
+**Endpoints disponibles:**
+
+- `POST /vehicles` - Registrar nuevo vehículo
+- `PUT /vehicles/{id}/mileage` - Actualizar kilometraje
+- `GET /vehicles/{id}` - Consultar vehículo por ID
+- `GET /vehicles` - Listar todos los vehículos con alertas
+- `DELETE /vehicles/{id}` - Eliminar vehículo (con cascade de alertas)
+
 ## Patrones de Diseño
 
 - **Observer Pattern**: Sistema de eventos para alertas de mantenimiento
@@ -76,4 +88,17 @@ Ver [USER_STORIES.md](USER_STORIES.md) para historias de usuario y criterios de 
 GitHub Actions ejecuta automáticamente:
 - Linting con Ruff
 - Tests con pytest
-- Validación de cobertura >= 70%
+- Validación de cobertura >= 85%
+
+## Estado del Proyecto
+
+**Historias de Usuario Implementadas:**
+- ✅ HU-001: Actualización de kilometraje con alertas automáticas
+- ✅ HU-002: Registro de nuevos vehículos
+- ✅ HU-003: Consulta de vehículos con alertas
+- ✅ HU-004: Eliminación de vehículos con cascade
+
+**Métricas:**
+- 46 tests pasando
+- 95.96% cobertura de código
+- 0 errores de linter
