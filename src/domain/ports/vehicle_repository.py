@@ -19,7 +19,7 @@ class VehicleRepository(ABC):
             Vehicle instance
 
         Raises:
-            ValueError: If vehicle not found
+            VehicleNotFoundException: If vehicle not found
         """
         pass
 
@@ -30,5 +30,28 @@ class VehicleRepository(ABC):
 
         Args:
             vehicle: Vehicle instance to save
+        """
+        pass
+
+    @abstractmethod
+    def get_all(self) -> list[Vehicle]:
+        """
+        Get all vehicles from repository.
+
+        Returns:
+            List of all Vehicle instances
+        """
+        pass
+
+    @abstractmethod
+    def delete(self, vehicle_id: str) -> None:
+        """
+        Delete vehicle from repository by ID.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle to delete
+
+        Raises:
+            VehicleNotFoundException: If vehicle not found
         """
         pass

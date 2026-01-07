@@ -53,7 +53,7 @@ class UpdateVehicleMileageUseCase:
 
         Raises:
             InvalidMileageException: If new mileage is invalid
-            ValueError: If vehicle not found
+            VehicleNotFoundException: If vehicle not found
         """
         # Get vehicle
         vehicle = self._vehicle_repository.get_by_id(vehicle_id)
