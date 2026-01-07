@@ -50,6 +50,84 @@ And no se debe generar ninguna alerta de mantenimiento
 
 ---
 
+## HU-002: Registro de nuevos vehículos en la flota
+
+**Como** gestor de flota
+**Quiero** registrar nuevos vehículos en el sistema
+**Para** poder gestionar su mantenimiento preventivo desde el inicio de su operación
+
+### Criterios de Aceptación
+
+#### Escenario 1: Registro exitoso de vehículo nuevo
+
+```gherkin
+Given que no existe un vehículo con ID 'V-456' en el sistema
+And no existe un vehículo con placa 'XYZ-789'
+When registro un nuevo vehículo con los siguientes datos:
+  | Campo               | Valor        |
+  | ID                  | V-456        |
+  | Placa               | XYZ-789      |
+  | Modelo              | Honda Civic  |
+  | Kilometraje Inicial | 0            |
+Then el vehículo debe ser registrado exitosamente
+And debe estar disponible para consulta posterior
+```
+
+#### Escenario 2: Error por ID duplicado (Anti-Happy Path)
+
+```gherkin
+Given que existe un vehículo con ID 'V-123' en el sistema
+When intento registrar un nuevo vehículo con ID 'V-123'
+Then el sistema debe lanzar una excepción 'DuplicateVehicleException'
+And el mensaje debe indicar "Ya existe un vehículo con ID V-123"
+```
+
+#### Escenario 3: Error por placa duplicada (Anti-Happy Path)
+
+```gherkin
+Given que existe un vehículo con placa 'ABC-123'
+When intento registrar un nuevo vehículo con placa 'ABC-123'
+Then el sistema debe lanzar una excepción 'DuplicatePlateException'
+And el mensaje debe indicar "Ya existe un vehículo con placa ABC-123"
+```
+
+#### Escenario 4: Validación de datos obligatorios
+
+```gherkin
+When intento registrar un vehículo con datos incompletos
+Then el sistema debe rechazar la operación
+
+Ejemplos de datos inválidos:
+- ID vacío o nulo
+- Placa vacía o nula
+- Modelo vacío o nulo
+- Formato de placa inválido (debe ser XXX-### o XXX-####)
+```
+
+#### Escenario 5: Validación de kilometraje inicial
+
+```gherkin
+Given datos válidos para un nuevo vehículo
+When intento registrar el vehículo con kilometraje inicial inválido
+Then el sistema debe rechazar la operación
+
+Ejemplos de kilometraje inicial inválido:
+- Kilometraje negativo
+- Kilometraje superior a 500,000 km (vehículos usados)
+```
+
+#### Escenario 6: Registro de vehículo usado con kilometraje inicial
+
+```gherkin
+Given que no existe un vehículo con ID 'V-789'
+When registro un vehículo usado con kilometraje inicial de 25,000 km
+Then el vehículo debe ser registrado exitosamente
+And el kilometraje actual debe ser 25,000 km
+And no se deben generar alertas automáticas en el registro inicial
+```
+
+---
+
 ## Reglas de Negocio
 
 - RN-001: El kilometraje debe ser siempre mayor al valor actual
@@ -59,5 +137,12 @@ And no se debe generar ninguna alerta de mantenimiento
 - RN-005: Se genera alerta cada 10,000 km (mantenimiento básico)
 - RN-006: Se genera alerta cada 50,000 km (mantenimiento mayor)
 - RN-007: Se genera alerta crítica al superar 100,000 km
+- RN-008: El ID del vehículo debe ser único en el sistema
+- RN-009: La placa del vehículo debe ser única en el sistema
+- RN-010: El formato de placa debe seguir el estándar colombiano (XXX-### o XXX-####)
+- RN-011: El ID del vehículo debe seguir el formato V-XXX
+- RN-012: El modelo del vehículo no puede estar vacío
+- RN-013: El kilometraje inicial debe estar entre 0 y 500,000 km
+- RN-014: No se generan alertas durante el registro inicial del vehículo
 
 ---
