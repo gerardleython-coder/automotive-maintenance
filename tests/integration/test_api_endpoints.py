@@ -188,3 +188,115 @@ class TestVehicleEndpoints:
         # Assert
         assert response.status_code == 400
         assert "Ya existe un vehículo con ID V-123" in response.json()["detail"]
+
+    def test_get_all_vehicles_successfully(self) -> None:
+        """
+        Given: Multiple vehicles exist in the database
+        When: GET /vehicles
+        Then: Should return 200 OK with all vehicles and their alerts
+        """
+        # Arrange
+        client = TestClient(app)
+        vehicle_repo = get_vehicle_repository()
+
+        # Create additional vehicles
+        vehicle2 = Vehicle(
+            id="V-456", plate="XYZ-456", model="Honda Civic", current_mileage=25000
+        )
+        vehicle3 = Vehicle(
+            id="V-789", plate="DEF-789", model="Mazda 3", current_mileage=5000
+        )
+        vehicle_repo.save(vehicle2)
+        vehicle_repo.save(vehicle3)
+
+        # Act
+        response = client.get("/vehicles")
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 3
+        assert isinstance(data, list)
+
+        # Verify structure of each vehicle
+        for vehicle_data in data:
+            assert "id" in vehicle_data
+            assert "plate" in vehicle_data
+            assert "model" in vehicle_data
+            assert "current_mileage" in vehicle_data
+            assert "alerts" in vehicle_data
+            assert isinstance(vehicle_data["alerts"], list)
+
+    def test_get_all_vehicles_returns_empty_list_when_no_vehicles(self) -> None:
+        """
+        Given: No vehicles in database (clean state)
+        When: GET /vehicles
+        Then: Should return 200 OK with empty list
+        """
+        # Arrange
+        client = TestClient(app)
+        from src.infrastructure.database.connection import SessionLocal
+        from src.infrastructure.database.models import AlertModel, VehicleModel
+
+        # Clean all vehicles (including V-123 from fixture)
+        session = SessionLocal()
+        session.query(AlertModel).delete()
+        session.query(VehicleModel).delete()
+        session.commit()
+        session.close()
+
+        # Act
+        response = client.get("/vehicles")
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        assert data == []
+        assert isinstance(data, list)
+
+    def test_get_all_vehicles_includes_alerts_ordered_by_timestamp(self) -> None:
+        """
+        Given: Vehicles with multiple alerts exist
+        When: GET /vehicles
+        Then: Should return vehicles with alerts ordered by timestamp descending
+        """
+        # Arrange
+        from datetime import datetime
+
+        from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
+        from src.web.dependencies import get_alert_repository
+
+        client = TestClient(app)
+        alert_repo = get_alert_repository()
+
+        # Create alerts for V-123 in different timestamps
+        alert1 = MaintenanceAlert(
+            id="alert-1",
+            vehicle_id="V-123",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=10000,
+            timestamp=datetime(2026, 1, 1, 10, 0, 0),
+        )
+        alert2 = MaintenanceAlert(
+            id="alert-2",
+            vehicle_id="V-123",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=20000,
+            timestamp=datetime(2026, 1, 5, 10, 0, 0),
+        )
+        alert_repo.save(alert1)
+        alert_repo.save(alert2)
+
+        # Act
+        response = client.get("/vehicles")
+
+        # Assert
+        assert response.status_code == 200
+        data = response.json()
+        vehicle_123 = next(v for v in data if v["id"] == "V-123")
+
+        assert len(vehicle_123["alerts"]) == 2
+        # Most recent first (timestamp desc)
+        assert vehicle_123["alerts"][0]["id"] == "alert-2"
+        assert vehicle_123["alerts"][1]["id"] == "alert-1"
+
