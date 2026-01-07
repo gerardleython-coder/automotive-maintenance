@@ -105,3 +105,71 @@ class TestMajorMaintenanceStrategy:
 
         # Assert
         assert alert_type == AlertType.MAJOR_MAINTENANCE
+
+
+class TestCriticalThresholdStrategy:
+    """Test cases for CriticalThresholdStrategy - at 100,000 km (RN-007)."""
+
+    def test_should_generate_alert_when_crossing_100000_km(self) -> None:
+        """
+        Given: CriticalThresholdStrategy for 100,000 km threshold
+        When: Checking if alert should be generated when crossing from 99,000 to 100,001 km
+        Then: Should return True
+        """
+        # Arrange
+        from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
+        strategy = CriticalThresholdStrategy()
+
+        # Act
+        result = strategy.should_generate_alert(old_mileage=99000, new_mileage=100001)
+
+        # Assert
+        assert result is True
+
+    def test_should_not_generate_alert_below_100000_km(self) -> None:
+        """
+        Given: CriticalThresholdStrategy for 100,000 km threshold
+        When: Checking if alert should be generated at 80,000 km
+        Then: Should return False
+        """
+        # Arrange
+        from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
+        strategy = CriticalThresholdStrategy()
+
+        # Act
+        result = strategy.should_generate_alert(old_mileage=50000, new_mileage=80000)
+
+        # Assert
+        assert result is False
+
+    def test_should_not_generate_alert_already_above_threshold(self) -> None:
+        """
+        Given: CriticalThresholdStrategy for 100,000 km threshold
+        When: Vehicle already above 100,000 km (from 110,000 to 120,000)
+        Then: Should return False (alert only triggers once when crossing)
+        """
+        # Arrange
+        from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
+        strategy = CriticalThresholdStrategy()
+
+        # Act
+        result = strategy.should_generate_alert(old_mileage=110000, new_mileage=120000)
+
+        # Assert
+        assert result is False
+
+    def test_get_alert_type_returns_critical(self) -> None:
+        """
+        Given: CriticalThresholdStrategy
+        When: Getting alert type
+        Then: Should return CRITICAL_THRESHOLD
+        """
+        # Arrange
+        from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
+        strategy = CriticalThresholdStrategy()
+
+        # Act
+        alert_type = strategy.get_alert_type()
+
+        # Assert
+        assert alert_type == AlertType.CRITICAL_THRESHOLD
