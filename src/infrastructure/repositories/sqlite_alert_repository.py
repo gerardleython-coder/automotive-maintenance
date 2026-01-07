@@ -68,10 +68,10 @@ class SqliteAlertRepository(AlertRepository):
 
     def get_all(self) -> list[MaintenanceAlert]:
         """
-        Get all alerts from database.
+        Get all alerts from database ordered by timestamp.
 
         Returns:
-            List of all MaintenanceAlert entities
+            List of all MaintenanceAlert entities ordered chronologically
         """
-        alert_models = self._db.query(AlertModel).all()
-        return [self._to_entity(alert_model) for alert_model in alert_models]
+        alert_models = self._db.query(AlertModel).order_by(AlertModel.timestamp).all()
+        return [self._to_entity(model) for model in alert_models]
