@@ -53,3 +53,55 @@ class TestBasicMaintenanceStrategy:
 
         # Assert
         assert alert_type == AlertType.BASIC_MAINTENANCE
+
+
+class TestMajorMaintenanceStrategy:
+    """Test cases for MajorMaintenanceStrategy - every 50,000 km."""
+
+    def test_should_generate_alert_at_50000_km(self) -> None:
+        """
+        Given: MajorMaintenanceStrategy for 50,000 km intervals
+        When: Checking if alert should be generated at 50,000 km
+        Then: Should return True
+        """
+        # Arrange
+        from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
+        strategy = MajorMaintenanceStrategy()
+
+        # Act
+        result = strategy.should_generate_alert(old_mileage=30000, new_mileage=50000)
+
+        # Assert
+        assert result is True
+
+    def test_should_not_generate_alert_at_40000_km(self) -> None:
+        """
+        Given: MajorMaintenanceStrategy for 50,000 km intervals
+        When: Checking if alert should be generated at 40,000 km
+        Then: Should return False
+        """
+        # Arrange
+        from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
+        strategy = MajorMaintenanceStrategy()
+
+        # Act
+        result = strategy.should_generate_alert(old_mileage=30000, new_mileage=40000)
+
+        # Assert
+        assert result is False
+
+    def test_get_alert_type_returns_major(self) -> None:
+        """
+        Given: MajorMaintenanceStrategy
+        When: Getting alert type
+        Then: Should return MAJOR_MAINTENANCE
+        """
+        # Arrange
+        from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
+        strategy = MajorMaintenanceStrategy()
+
+        # Act
+        alert_type = strategy.get_alert_type()
+
+        # Assert
+        assert alert_type == AlertType.MAJOR_MAINTENANCE
