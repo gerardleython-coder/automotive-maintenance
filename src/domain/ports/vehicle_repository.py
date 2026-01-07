@@ -19,7 +19,7 @@ class VehicleRepository(ABC):
             Vehicle instance
 
         Raises:
-            ValueError: If vehicle not found
+            VehicleNotFoundException: If vehicle not found
         """
         pass
 

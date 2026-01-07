@@ -1,10 +1,13 @@
 """Integration tests for FastAPI endpoints."""
 
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 from src.domain.entities.vehicle import Vehicle
-from src.web.dependencies import get_vehicle_repository
+from src.web.dependencies import get_alert_repository, get_vehicle_repository
 from src.web.main import app
 
 
@@ -261,11 +264,6 @@ class TestVehicleEndpoints:
         Then: Should return vehicles with alerts ordered by timestamp descending
         """
         # Arrange
-        from datetime import datetime
-
-        from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
-        from src.web.dependencies import get_alert_repository
-
         client = TestClient(app)
         alert_repo = get_alert_repository()
 
@@ -346,12 +344,6 @@ class TestVehicleEndpoints:
         And: No orphan alerts should remain in database
         """
         # Arrange
-        from datetime import datetime
-
-        from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
-        from src.domain.entities.vehicle import Vehicle
-        from src.web.dependencies import get_alert_repository, get_vehicle_repository
-
         client = TestClient(app)
         vehicle_repo = get_vehicle_repository()
         alert_repo = get_alert_repository()
