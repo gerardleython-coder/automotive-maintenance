@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.domain.entities.vehicle import Vehicle
-from src.web.dependencies import get_alert_repository, get_vehicle_repository
+from src.web.dependencies import get_vehicle_repository
 from src.web.main import app
 
 
@@ -12,7 +12,6 @@ from src.web.main import app
 def reset_test_vehicle():
     """Reset test vehicle to initial state before each test."""
     vehicle_repo = get_vehicle_repository()
-    alert_repo = get_alert_repository()
 
     # Reset vehicle V-123 to initial state
     test_vehicle = Vehicle(
