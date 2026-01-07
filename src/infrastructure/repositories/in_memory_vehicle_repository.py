@@ -11,6 +11,18 @@ class InMemoryVehicleRepository(VehicleRepository):
         """Initialize repository with empty storage."""
         self._vehicles: Dict[str, Vehicle] = {}
 
+    def _exists(self, vehicle_id: str) -> bool:
+        """
+        Check if vehicle exists in repository.
+
+        Args:
+            vehicle_id: Vehicle identifier
+
+        Returns:
+            True if vehicle exists, False otherwise
+        """
+        return vehicle_id in self._vehicles
+
     def get_by_id(self, vehicle_id: str) -> Vehicle:
         """
         Get vehicle by ID.
@@ -24,7 +36,7 @@ class InMemoryVehicleRepository(VehicleRepository):
         Raises:
             ValueError: If vehicle not found
         """
-        if vehicle_id not in self._vehicles:
+        if not self._exists(vehicle_id):
             raise ValueError(f"Vehicle {vehicle_id} not found")
         return self._vehicles[vehicle_id]
 
