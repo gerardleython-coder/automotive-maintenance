@@ -29,6 +29,16 @@ class RegisterVehicleUseCase:
         Raises:
             ValueError: If vehicle with same ID already exists
         """
+        # Validate vehicle ID doesn't exist
+        try:
+            self._vehicle_repository.get_by_id(vehicle_id)
+            raise ValueError(f"Ya existe un vehículo con ID {vehicle_id}")
+        except ValueError as e:
+            # If error message contains "Ya existe", re-raise it
+            if "Ya existe" in str(e):
+                raise
+            # Otherwise, vehicle doesn't exist (expected), continue
+
         # Create new vehicle entity
         vehicle = Vehicle(
             id=vehicle_id, plate=plate, model=model, current_mileage=initial_mileage
