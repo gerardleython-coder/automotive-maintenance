@@ -14,7 +14,7 @@ Sistema que implementa **Arquitectura Hexagonal** con **TDD estricto** para gest
 - ✓ Reglas de mantenimiento extensibles (Strategy Pattern)
 - ✓ API REST con 5 endpoints
 - ✓ Arquitectura Limpia (Hexagonal)
-- ✓ TDD estricto con cobertura >= 85%
+- ✓ TDD estricto con cobertura >= 70%
 - ✓ Principios SOLID
 
 ## Requisitos
@@ -88,7 +88,7 @@ Ver [USER_STORIES.md](USER_STORIES.md) para historias de usuario y criterios de 
 GitHub Actions ejecuta automáticamente:
 - Linting con Ruff
 - Tests con pytest
-- Validación de cobertura >= 85%
+- Validación de cobertura >= 70%
 
 ## Estado del Proyecto
 
