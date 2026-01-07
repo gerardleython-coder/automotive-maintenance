@@ -1,51 +1,20 @@
 """Tests for UpdateVehicleMileageUseCase following TDD approach."""
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
+from src.application.use_cases.update_vehicle_mileage_use_case import (
+    UpdateVehicleMileageUseCase,
+)
 from src.domain.entities.maintenance_alert import AlertType
 from src.domain.entities.vehicle import Vehicle
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
-from src.infrastructure.database.models import Base
-from src.infrastructure.repositories.sqlite_alert_repository import SqliteAlertRepository
-from src.infrastructure.repositories.sqlite_vehicle_repository import SqliteVehicleRepository
-
-
-@pytest.fixture
-def test_db():
-    """Create test database with persistent SQLite."""
-    # Use test database file
-    engine = create_engine("sqlite:///test_maintenance.db")
-    Base.metadata.create_all(engine)
-    session_local = sessionmaker(bind=engine)
-    session = session_local()
-
-    yield session
-
-    # Cleanup after test
-    session.close()
-    Base.metadata.drop_all(engine)
-
-
-@pytest.fixture
-def vehicle_repo(test_db):
-    """Create vehicle repository with test database."""
-    return SqliteVehicleRepository(test_db)
-
-
-@pytest.fixture
-def alert_repo(test_db):
-    """Create alert repository with test database."""
-    return SqliteAlertRepository(test_db)
 
 
 class TestUpdateVehicleMileageUseCase:
     """Test cases for UpdateVehicleMileageUseCase."""
 
     def test_update_mileage_successfully(
-        self, vehicle_repo, alert_repo
+        self, vehicle_repository, alert_repository
     ) -> None:
         """
         Given: A vehicle with 5,000 km
@@ -57,22 +26,22 @@ class TestUpdateVehicleMileageUseCase:
         vehicle = Vehicle(
             id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000
         )
-        vehicle_repo.save(vehicle)
+        vehicle_repository.save(vehicle)
 
         use_case = UpdateVehicleMileageUseCase(
-            vehicle_repository=vehicle_repo,
-            alert_repository=alert_repo
+            vehicle_repository=vehicle_repository,
+            alert_repository=alert_repository
         )
 
         # Act
         use_case.execute(vehicle_id="V-123", new_mileage=8000)
 
         # Assert
-        updated_vehicle = vehicle_repo.get_by_id("V-123")
+        updated_vehicle = vehicle_repository.get_by_id("V-123")
         assert updated_vehicle.current_mileage == 8000
 
     def test_update_mileage_with_invalid_value_raises_exception(
-        self, vehicle_repo, alert_repo
+        self, vehicle_repository, alert_repository
     ) -> None:
         """
         Given: A vehicle with 5,000 km
@@ -83,11 +52,11 @@ class TestUpdateVehicleMileageUseCase:
         vehicle = Vehicle(
             id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000
         )
-        vehicle_repo.save(vehicle)
+        vehicle_repository.save(vehicle)
 
         use_case = UpdateVehicleMileageUseCase(
-            vehicle_repository=vehicle_repo,
-            alert_repository=alert_repo
+            vehicle_repository=vehicle_repository,
+            alert_repository=alert_repository
         )
 
         # Act & Assert
@@ -95,7 +64,7 @@ class TestUpdateVehicleMileageUseCase:
             use_case.execute(vehicle_id="V-123", new_mileage=4000)
 
     def test_update_mileage_crossing_10k_threshold_generates_alert(
-        self, vehicle_repo, alert_repo
+        self, vehicle_repository, alert_repository
     ) -> None:
         """
         Given: A vehicle with 5,000 km and basic maintenance strategy
@@ -106,18 +75,18 @@ class TestUpdateVehicleMileageUseCase:
         vehicle = Vehicle(
             id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000
         )
-        vehicle_repo.save(vehicle)
+        vehicle_repository.save(vehicle)
 
         use_case = UpdateVehicleMileageUseCase(
-            vehicle_repository=vehicle_repo,
-            alert_repository=alert_repo
+            vehicle_repository=vehicle_repository,
+            alert_repository=alert_repository
         )
 
         # Act
         use_case.execute(vehicle_id="V-123", new_mileage=10001)
 
         # Assert
-        alerts = alert_repo.get_all()
+        alerts = alert_repository.get_all()
         assert len(alerts) == 1
         alert = alerts[0]
         assert alert.vehicle_id == "V-123"

@@ -1,38 +1,12 @@
 """Tests for RegisterVehicleUseCase following TDD approach."""
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from src.infrastructure.database.models import Base
-from src.infrastructure.repositories.sqlite_vehicle_repository import SqliteVehicleRepository
-
-
-@pytest.fixture
-def test_db():
-    """Create test database with persistent SQLite."""
-    engine = create_engine("sqlite:///test_maintenance.db")
-    Base.metadata.create_all(engine)
-    session_local = sessionmaker(bind=engine)
-    session = session_local()
-
-    yield session
-
-    # Cleanup after test
-    session.close()
-    Base.metadata.drop_all(engine)
-
-
-@pytest.fixture
-def vehicle_repo(test_db):
-    """Create vehicle repository with test database."""
-    return SqliteVehicleRepository(test_db)
 
 
 class TestRegisterVehicleUseCase:
     """Test cases for RegisterVehicleUseCase."""
 
-    def test_register_new_vehicle_successfully(self, vehicle_repo) -> None:
+    def test_register_new_vehicle_successfully(self, vehicle_repository) -> None:
         """
         Given: No vehicle with ID 'V-456' exists
         When: Registering a new vehicle with valid data
@@ -44,7 +18,7 @@ class TestRegisterVehicleUseCase:
             RegisterVehicleUseCase,
         )
 
-        use_case = RegisterVehicleUseCase(vehicle_repository=vehicle_repo)
+        use_case = RegisterVehicleUseCase(vehicle_repository=vehicle_repository)
 
         # Act
         use_case.execute(
@@ -55,14 +29,14 @@ class TestRegisterVehicleUseCase:
         )
 
         # Assert
-        saved_vehicle = vehicle_repo.get_by_id("V-456")
+        saved_vehicle = vehicle_repository.get_by_id("V-456")
         assert saved_vehicle.id == "V-456"
         assert saved_vehicle.plate == "XYZ-789"
         assert saved_vehicle.model == "Honda Civic"
         assert saved_vehicle.current_mileage == 0
 
     def test_register_vehicle_with_duplicate_id_raises_exception(
-        self, vehicle_repo
+        self, vehicle_repository
     ) -> None:
         """
         Given: A vehicle with ID 'V-123' already exists
@@ -82,9 +56,9 @@ class TestRegisterVehicleUseCase:
         existing_vehicle = Vehicle(
             id="V-123", plate="ABC-123", model="Toyota Corolla", current_mileage=5000
         )
-        vehicle_repo.save(existing_vehicle)
+        vehicle_repository.save(existing_vehicle)
 
-        use_case = RegisterVehicleUseCase(vehicle_repository=vehicle_repo)
+        use_case = RegisterVehicleUseCase(vehicle_repository=vehicle_repository)
 
         # Act & Assert
         with pytest.raises(
