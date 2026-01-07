@@ -1,5 +1,4 @@
 """MaintenanceAlert entity for tracking vehicle maintenance alerts."""
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
@@ -12,12 +11,29 @@ class AlertType(Enum):
     CRITICAL_THRESHOLD = "critical_threshold"  # At 100,000 km
 
 
-@dataclass
 class MaintenanceAlert:
     """Alert generated when vehicle reaches maintenance threshold."""
 
-    id: str
-    vehicle_id: str
-    alert_type: AlertType
-    mileage: int
-    timestamp: datetime
+    def __init__(
+        self,
+        id: str,
+        vehicle_id: str,
+        alert_type: AlertType,
+        mileage: int,
+        timestamp: datetime
+    ) -> None:
+        """
+        Initialize a MaintenanceAlert instance.
+
+        Args:
+            id: Unique identifier for the alert
+            vehicle_id: Identifier of the vehicle triggering the alert
+            alert_type: Type of maintenance alert
+            mileage: Mileage at which alert was triggered
+            timestamp: When the alert was generated
+        """
+        self.id = id
+        self.vehicle_id = vehicle_id
+        self.alert_type = alert_type
+        self.mileage = mileage
+        self.timestamp = timestamp
