@@ -3,8 +3,7 @@ import pytest
 from datetime import datetime
 
 from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase
-from src.domain.entities.alert_type import AlertType
-from src.domain.entities.maintenance_alert import MaintenanceAlert
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 from src.domain.entities.vehicle import Vehicle
 from src.infrastructure.database.connection import SessionLocal, create_tables
 from src.infrastructure.database.models import AlertModel, VehicleModel
