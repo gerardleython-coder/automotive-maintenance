@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
+from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase
 from src.application.use_cases.register_vehicle_use_case import RegisterVehicleUseCase
 from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
 from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
@@ -47,6 +48,18 @@ class AlertResponse(BaseModel):
     timestamp: str
 
 
+class VehicleWithAlertsResponse(BaseModel):
+    """Response model for vehicle with its alerts."""
+    id: str
+    plate: str
+    model: str
+    current_mileage: int
+    alerts: list[AlertResponse]
+
+    class Config:
+        from_attributes = True
+
+
 # Initialize dependencies and test data
 initialize_test_data()
 
@@ -89,6 +102,48 @@ def create_vehicle(request: CreateVehicleRequest):
         )
     except DuplicateVehicleException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.get("/vehicles", response_model=list[VehicleWithAlertsResponse], status_code=status.HTTP_200_OK)
+def get_all_vehicles():
+    """
+    Get all vehicles with their alerts.
+
+    Returns:
+        List of all vehicles with their alerts ordered by timestamp descending
+    """
+    use_case = GetAllVehiclesUseCase(
+        vehicle_repository=get_vehicle_repository(),
+        alert_repository=get_alert_repository()
+    )
+    result = use_case.execute()
+
+    # Convert to response DTOs
+    response = []
+    for item in result:
+        vehicle = item["vehicle"]
+        alerts = item["alerts"]
+
+        alert_responses = [
+            AlertResponse(
+                id=alert.id,
+                vehicle_id=alert.vehicle_id,
+                alert_type=alert.alert_type.value,
+                mileage=alert.mileage,
+                timestamp=alert.timestamp.isoformat()
+            )
+            for alert in alerts
+        ]
+
+        response.append(VehicleWithAlertsResponse(
+            id=vehicle.id,
+            plate=vehicle.plate,
+            model=vehicle.model,
+            current_mileage=vehicle.current_mileage,
+            alerts=alert_responses
+        ))
+
+    return response
 
 
 @app.get("/vehicles/{vehicle_id}", response_model=VehicleResponse, status_code=status.HTTP_200_OK)
