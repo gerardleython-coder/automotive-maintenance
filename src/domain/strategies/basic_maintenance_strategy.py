@@ -8,18 +8,6 @@ class BasicMaintenanceStrategy(MaintenanceStrategy):
 
     INTERVAL = 10_000
 
-    def _calculate_threshold(self, mileage: int) -> int:
-        """
-        Calculate the maintenance threshold for given mileage.
-
-        Args:
-            mileage: Current mileage value
-
-        Returns:
-            The last crossed threshold (multiple of INTERVAL)
-        """
-        return (mileage // self.INTERVAL) * self.INTERVAL
-
     def should_generate_alert(self, old_mileage: int, new_mileage: int) -> bool:
         """
         Check if vehicle crosses a 10,000 km threshold.

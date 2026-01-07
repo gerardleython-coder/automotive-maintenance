@@ -6,6 +6,20 @@ from src.domain.entities.maintenance_alert import AlertType
 class MaintenanceStrategy(ABC):
     """Interface for maintenance strategies following Strategy Pattern."""
 
+    INTERVAL: int  # Must be defined by subclasses
+
+    def _calculate_threshold(self, mileage: int) -> int:
+        """
+        Calculate the maintenance threshold for given mileage.
+
+        Args:
+            mileage: Current mileage value
+
+        Returns:
+            The last crossed threshold (multiple of INTERVAL)
+        """
+        return (mileage // self.INTERVAL) * self.INTERVAL
+
     @abstractmethod
     def should_generate_alert(self, old_mileage: int, new_mileage: int) -> bool:
         """
