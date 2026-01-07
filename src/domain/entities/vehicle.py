@@ -34,5 +34,16 @@ class Vehicle:
             raise InvalidMileageException(
                 f"El kilometraje {new_mileage} debe ser mayor al actual {self.current_mileage}"
             )
+        
+        if new_mileage > 1000000:
+            raise InvalidMileageException(
+                f"El kilometraje {new_mileage} excede el límite máximo de 1,000,000 km"
+            )
+        
+        increment = new_mileage - self.current_mileage
+        if increment > 50000:
+            raise InvalidMileageException(
+                f"El incremento de {increment} km excede el máximo permitido de 50,000 km"
+            )
 
         self.current_mileage = new_mileage
