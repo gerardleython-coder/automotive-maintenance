@@ -1,17 +1,24 @@
 """FastAPI application - Web layer."""
 
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase
 from src.application.use_cases.register_vehicle_use_case import RegisterVehicleUseCase
-from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
+from src.application.use_cases.update_vehicle_mileage_use_case import (
+    UpdateVehicleMileageUseCase,
+)
+from src.domain.entities.maintenance_alert import MaintenanceAlert
 from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
 from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
 from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
-from src.web.dependencies import get_alert_repository, get_vehicle_repository, initialize_test_data
+from src.web.dependencies import (
+    get_alert_repository,
+    get_vehicle_repository,
+    initialize_test_data,
+)
 
 
 # DTOs
@@ -30,13 +37,12 @@ class UpdateMileageRequest(BaseModel):
 
 class VehicleResponse(BaseModel):
     """Response model for vehicle data."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     plate: str
     model: str
     current_mileage: int
-
-    class Config:
-        from_attributes = True
 
 
 class AlertResponse(BaseModel):
@@ -50,14 +56,13 @@ class AlertResponse(BaseModel):
 
 class VehicleWithAlertsResponse(BaseModel):
     """Response model for vehicle with its alerts."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     plate: str
     model: str
     current_mileage: int
     alerts: list[AlertResponse]
-
-    class Config:
-        from_attributes = True
 
 
 # Initialize dependencies and test data
@@ -67,11 +72,35 @@ initialize_test_data()
 app = FastAPI(
     title="Automotive Fleet Management API",
     description="API for managing vehicle fleet and maintenance alerts",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 
-@app.post("/vehicles", response_model=VehicleResponse, status_code=status.HTTP_201_CREATED)
+# Helper functions for DTO mapping
+def _map_alert_to_response(alert: MaintenanceAlert) -> AlertResponse:
+    """
+    Map MaintenanceAlert entity to AlertResponse DTO.
+
+    Args:
+        alert: MaintenanceAlert entity
+
+    Returns:
+        AlertResponse DTO
+    """
+    return AlertResponse(
+        id=alert.id,
+        vehicle_id=alert.vehicle_id,
+        alert_type=alert.alert_type.value,
+        mileage=alert.mileage,
+        timestamp=alert.timestamp.isoformat(),
+    )
+
+
+@app.post(
+    "/vehicles",
+    response_model=VehicleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_vehicle(request: CreateVehicleRequest):
     """
     Create a new vehicle.
@@ -104,7 +133,11 @@ def create_vehicle(request: CreateVehicleRequest):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@app.get("/vehicles", response_model=list[VehicleWithAlertsResponse], status_code=status.HTTP_200_OK)
+@app.get(
+    "/vehicles",
+    response_model=list[VehicleWithAlertsResponse],
+    status_code=status.HTTP_200_OK,
+)
 def get_all_vehicles():
     """
     Get all vehicles with their alerts.
@@ -114,7 +147,7 @@ def get_all_vehicles():
     """
     use_case = GetAllVehiclesUseCase(
         vehicle_repository=get_vehicle_repository(),
-        alert_repository=get_alert_repository()
+        alert_repository=get_alert_repository(),
     )
     result = use_case.execute()
 
@@ -124,24 +157,17 @@ def get_all_vehicles():
         vehicle = item["vehicle"]
         alerts = item["alerts"]
 
-        alert_responses = [
-            AlertResponse(
-                id=alert.id,
-                vehicle_id=alert.vehicle_id,
-                alert_type=alert.alert_type.value,
-                mileage=alert.mileage,
-                timestamp=alert.timestamp.isoformat()
-            )
-            for alert in alerts
-        ]
+        alert_responses = [_map_alert_to_response(alert) for alert in alerts]
 
-        response.append(VehicleWithAlertsResponse(
-            id=vehicle.id,
-            plate=vehicle.plate,
-            model=vehicle.model,
-            current_mileage=vehicle.current_mileage,
-            alerts=alert_responses
-        ))
+        response.append(
+            VehicleWithAlertsResponse(
+                id=vehicle.id,
+                plate=vehicle.plate,
+                model=vehicle.model,
+                current_mileage=vehicle.current_mileage,
+                alerts=alert_responses,
+            )
+        )
 
     return response
 
