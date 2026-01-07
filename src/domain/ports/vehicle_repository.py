@@ -32,3 +32,13 @@ class VehicleRepository(ABC):
             vehicle: Vehicle instance to save
         """
         pass
+
+    @abstractmethod
+    def get_all(self) -> list[Vehicle]:
+        """
+        Get all vehicles from repository.
+
+        Returns:
+            List of all Vehicle instances
+        """
+        pass
