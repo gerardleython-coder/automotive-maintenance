@@ -1,0 +1,50 @@
+"""In-Memory Vehicle Repository - Infrastructure layer."""
+
+from src.domain.entities.vehicle import Vehicle
+from src.domain.ports.vehicle_repository import VehicleRepository
+
+
+class InMemoryVehicleRepository(VehicleRepository):
+    """In-memory implementation of VehicleRepository for testing and development."""
+
+    def __init__(self) -> None:
+        """Initialize repository with empty storage."""
+        self._vehicles: dict[str, Vehicle] = {}
+
+    def _exists(self, vehicle_id: str) -> bool:
+        """
+        Check if vehicle exists in repository.
+
+        Args:
+            vehicle_id: Vehicle identifier
+
+        Returns:
+            True if vehicle exists, False otherwise
+        """
+        return vehicle_id in self._vehicles
+
+    def get_by_id(self, vehicle_id: str) -> Vehicle:
+        """
+        Get vehicle by ID.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle
+
+        Returns:
+            Vehicle instance
+
+        Raises:
+            ValueError: If vehicle not found
+        """
+        if not self._exists(vehicle_id):
+            raise ValueError(f"Vehicle {vehicle_id} not found")
+        return self._vehicles[vehicle_id]
+
+    def save(self, vehicle: Vehicle) -> None:
+        """
+        Save vehicle to repository.
+
+        Args:
+            vehicle: Vehicle instance to save
+        """
+        self._vehicles[vehicle.id] = vehicle
