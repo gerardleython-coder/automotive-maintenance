@@ -2,6 +2,7 @@
 import pytest
 from src.domain.entities.vehicle import Vehicle
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
+from src.domain.ports.observer import Observer
 
 
 class TestVehicleCreation:
@@ -88,3 +89,40 @@ class TestVehicleMileageUpdate:
         # Act & Assert
         with pytest.raises(InvalidMileageException):
             vehicle.update_mileage(60000)  # Increment of 55,000 km
+
+
+class MockObserver(Observer):
+    """Mock observer for testing."""
+
+    def __init__(self) -> None:
+        self.notifications = []
+
+    def update(self, vehicle_id: str, mileage: int) -> None:
+        """Record notification."""
+        self.notifications.append({"vehicle_id": vehicle_id, "mileage": mileage})
+
+
+class TestVehicleObserverPattern:
+    """Test cases for Vehicle Observer Pattern - HU-001 Escenario 1."""
+
+    def test_update_mileage_to_10000_generates_alert(self) -> None:
+        """
+        Given: A vehicle with 5,000 km and a registered observer
+        And: Maintenance rule every 10,000 km
+        When: Updating mileage to 10,001 km
+        Then: Mileage should be updated to 10,001 km
+        And: Observer should be notified automatically
+        """
+        # Arrange
+        vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000)
+        mock_observer = MockObserver()
+        vehicle.attach(mock_observer)
+
+        # Act
+        vehicle.update_mileage(10001)
+
+        # Assert
+        assert vehicle.current_mileage == 10001
+        assert len(mock_observer.notifications) == 1
+        assert mock_observer.notifications[0]["vehicle_id"] == "V-123"
+        assert mock_observer.notifications[0]["mileage"] == 10001
