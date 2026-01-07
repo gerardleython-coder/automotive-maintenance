@@ -8,11 +8,10 @@ from src.domain.entities.vehicle import Vehicle
 from src.domain.entities.maintenance_alert import MaintenanceAlert, AlertType
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
-from src.infrastructure.repositories.in_memory_vehicle_repository import InMemoryVehicleRepository
-from src.infrastructure.repositories.in_memory_alert_repository import InMemoryAlertRepository
 from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
 from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
 from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
+from src.web.dependencies import get_vehicle_repository, get_alert_repository, initialize_test_data
 
 
 # DTOs
@@ -41,13 +40,8 @@ class AlertResponse(BaseModel):
     timestamp: str
 
 
-# Initialize repositories and dependencies
-vehicle_repository = InMemoryVehicleRepository()
-alert_repository = InMemoryAlertRepository()
-
-# Preload test data
-test_vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota Corolla", current_mileage=5000)
-vehicle_repository.save(test_vehicle)
+# Initialize dependencies and test data
+initialize_test_data()
 
 # Create app
 app = FastAPI(
@@ -72,7 +66,7 @@ def get_vehicle(vehicle_id: str):
         HTTPException: 404 if vehicle not found
     """
     try:
-        vehicle = vehicle_repository.get_by_id(vehicle_id)
+        vehicle = get_vehicle_repository().get_by_id(vehicle_id)
         return VehicleResponse(
             id=vehicle.id,
             plate=vehicle.plate,
@@ -100,8 +94,8 @@ def update_vehicle_mileage(vehicle_id: str, request: UpdateMileageRequest):
     """
     # Create use case with all strategies
     use_case = UpdateVehicleMileageUseCase(
-        vehicle_repository=vehicle_repository,
-        alert_repository=alert_repository,
+        vehicle_repository=get_vehicle_repository(),
+        alert_repository=get_alert_repository(),
         strategies=[
             BasicMaintenanceStrategy(),
             MajorMaintenanceStrategy(),
@@ -111,7 +105,7 @@ def update_vehicle_mileage(vehicle_id: str, request: UpdateMileageRequest):
     
     try:
         use_case.execute(vehicle_id=vehicle_id, new_mileage=request.new_mileage)
-        vehicle = vehicle_repository.get_by_id(vehicle_id)
+        vehicle = get_vehicle_repository().get_by_id(vehicle_id)
         return VehicleResponse(
             id=vehicle.id,
             plate=vehicle.plate,
@@ -135,7 +129,7 @@ def get_vehicle_alerts(vehicle_id: str):
     Returns:
         List of maintenance alerts for the vehicle
     """
-    all_alerts = alert_repository.get_all()
+    all_alerts = get_alert_repository().get_all()
     vehicle_alerts = [alert for alert in all_alerts if alert.vehicle_id == vehicle_id]
     
     return [
