@@ -68,13 +68,16 @@ class TestRegisterVehicleUseCase:
         """
         Given: A vehicle with ID 'V-123' already exists
         When: Attempting to register another vehicle with same ID
-        Then: Should raise ValueError with appropriate message
+        Then: Should raise DuplicateVehicleException with appropriate message
         """
         # Arrange
         from src.application.use_cases.register_vehicle_use_case import (
             RegisterVehicleUseCase,
         )
         from src.domain.entities.vehicle import Vehicle
+        from src.domain.exceptions.duplicate_vehicle_exception import (
+            DuplicateVehicleException,
+        )
 
         # Create existing vehicle
         existing_vehicle = Vehicle(
@@ -85,7 +88,9 @@ class TestRegisterVehicleUseCase:
         use_case = RegisterVehicleUseCase(vehicle_repository=vehicle_repo)
 
         # Act & Assert
-        with pytest.raises(ValueError, match="Ya existe un vehículo con ID V-123"):
+        with pytest.raises(
+            DuplicateVehicleException, match="Ya existe un vehículo con ID V-123"
+        ):
             use_case.execute(
                 vehicle_id="V-123",
                 plate="XYZ-999",

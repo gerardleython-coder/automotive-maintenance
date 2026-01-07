@@ -1,6 +1,7 @@
 """Use case for registering a new vehicle in the system."""
 
 from src.domain.entities.vehicle import Vehicle
+from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
 from src.domain.ports.vehicle_repository import VehicleRepository
 
 
@@ -27,17 +28,15 @@ class RegisterVehicleUseCase:
             The registered vehicle entity
 
         Raises:
-            ValueError: If vehicle with same ID already exists
+            DuplicateVehicleException: If vehicle with same ID already exists
         """
         # Validate vehicle ID doesn't exist
         try:
             self._vehicle_repository.get_by_id(vehicle_id)
-            raise ValueError(f"Ya existe un vehículo con ID {vehicle_id}")
-        except ValueError as e:
-            # If error message contains "Ya existe", re-raise it
-            if "Ya existe" in str(e):
-                raise
-            # Otherwise, vehicle doesn't exist (expected), continue
+            raise DuplicateVehicleException(f"Ya existe un vehículo con ID {vehicle_id}")
+        except ValueError:
+            # Vehicle doesn't exist (expected), continue
+            pass
 
         # Create new vehicle entity
         vehicle = Vehicle(
