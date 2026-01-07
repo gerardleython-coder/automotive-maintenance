@@ -42,3 +42,16 @@ class VehicleRepository(ABC):
             List of all Vehicle instances
         """
         pass
+
+    @abstractmethod
+    def delete(self, vehicle_id: str) -> None:
+        """
+        Delete vehicle from repository by ID.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle to delete
+
+        Raises:
+            VehicleNotFoundException: If vehicle not found
+        """
+        pass

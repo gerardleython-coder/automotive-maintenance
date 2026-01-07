@@ -299,4 +299,3 @@ class TestVehicleEndpoints:
         # Most recent first (timestamp desc)
         assert vehicle_123["alerts"][0]["id"] == "alert-2"
         assert vehicle_123["alerts"][1]["id"] == "alert-1"
-
