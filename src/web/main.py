@@ -11,6 +11,9 @@ from src.application.use_cases.update_vehicle_mileage_use_case import (
 from src.domain.entities.maintenance_alert import MaintenanceAlert
 from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
+from src.domain.exceptions.vehicle_not_found_exception import (
+    VehicleNotFoundException,
+)
 from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
 from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
 from src.domain.strategies.major_maintenance_strategy import MajorMaintenanceStrategy
@@ -239,7 +242,7 @@ def update_vehicle_mileage(vehicle_id: str, request: UpdateMileageRequest):
         )
     except InvalidMileageException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except ValueError as e:
+    except VehicleNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 

@@ -1,6 +1,9 @@
 """Dependency injection configuration."""
 
 from src.domain.entities.vehicle import Vehicle
+from src.domain.exceptions.vehicle_not_found_exception import (
+    VehicleNotFoundException,
+)
 from src.infrastructure.database.connection import SessionLocal, create_tables
 from src.infrastructure.repositories.sqlite_alert_repository import SqliteAlertRepository
 from src.infrastructure.repositories.sqlite_vehicle_repository import SqliteVehicleRepository
@@ -33,7 +36,7 @@ def initialize_test_data() -> None:
         _vehicle_repository.get_by_id("V-123")
         # Vehicle exists, skip initialization
         return
-    except ValueError:
+    except VehicleNotFoundException:
         # Vehicle doesn't exist, create it
         test_vehicle = Vehicle(
             id="V-123", plate="ABC-123", model="Toyota Corolla", current_mileage=5000

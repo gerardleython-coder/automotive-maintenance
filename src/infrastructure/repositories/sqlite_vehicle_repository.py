@@ -66,6 +66,30 @@ class SqliteVehicleRepository(VehicleRepository):
         """
         return [self._to_entity(model) for model in vehicle_models]
 
+    def _get_vehicle_model_or_raise(self, vehicle_id: str) -> VehicleModel:
+        """
+        Get vehicle model by ID or raise exception if not found.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle
+
+        Returns:
+            VehicleModel instance
+
+        Raises:
+            VehicleNotFoundException: If vehicle not found
+        """
+        vehicle_model = (
+            self._db.query(VehicleModel).filter_by(id=vehicle_id).first()
+        )
+
+        if vehicle_model is None:
+            raise VehicleNotFoundException(
+                f"Vehículo con ID {vehicle_id} no encontrado"
+            )
+
+        return vehicle_model
+
     def save(self, vehicle: Vehicle) -> None:
         """
         Save vehicle to SQLite database.
@@ -88,15 +112,9 @@ class SqliteVehicleRepository(VehicleRepository):
             Vehicle entity
 
         Raises:
-            ValueError: If vehicle not found
+            VehicleNotFoundException: If vehicle not found
         """
-        vehicle_model = (
-            self._db.query(VehicleModel).filter_by(id=vehicle_id).first()
-        )
-
-        if vehicle_model is None:
-            raise ValueError(f"Vehicle {vehicle_id} not found")
-
+        vehicle_model = self._get_vehicle_model_or_raise(vehicle_id)
         return self._to_entity(vehicle_model)
 
     def get_all(self) -> list[Vehicle]:
@@ -119,12 +137,6 @@ class SqliteVehicleRepository(VehicleRepository):
         Raises:
             VehicleNotFoundException: If vehicle not found
         """
-        vehicle_model = (
-            self._db.query(VehicleModel).filter_by(id=vehicle_id).first()
-        )
-
-        if vehicle_model is None:
-            raise VehicleNotFoundException(f"Vehículo con ID {vehicle_id} no encontrado")
-
+        vehicle_model = self._get_vehicle_model_or_raise(vehicle_id)
         self._db.delete(vehicle_model)
         self._db.commit()

@@ -5,6 +5,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.domain.entities.vehicle import Vehicle
+from src.domain.exceptions.vehicle_not_found_exception import (
+    VehicleNotFoundException,
+)
 from src.infrastructure.database.models import Base
 from src.infrastructure.repositories.sqlite_vehicle_repository import (
     SqliteVehicleRepository,
@@ -90,14 +93,14 @@ class TestSqliteVehicleRepository:
 
     def test_get_nonexistent_vehicle_raises_error(self, repository):
         """
-        Test that getting a nonexistent vehicle raises ValueError.
+        Test that getting a nonexistent vehicle raises VehicleNotFoundException.
 
         Given an empty database
         When get_by_id() is called with a nonexistent vehicle ID
-        Then ValueError should be raised with appropriate message
+        Then VehicleNotFoundException should be raised with appropriate message
         """
         # Act & Assert
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(VehicleNotFoundException) as exc_info:
             repository.get_by_id("V-999")
 
-        assert "Vehicle V-999 not found" in str(exc_info.value)
+        assert "Vehículo con ID V-999 no encontrado" in str(exc_info.value)
