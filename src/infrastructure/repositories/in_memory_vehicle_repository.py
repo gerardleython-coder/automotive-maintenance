@@ -1,7 +1,7 @@
 """In-Memory Vehicle Repository - Infrastructure layer."""
-from typing import Dict
-from src.domain.ports.vehicle_repository import VehicleRepository
+
 from src.domain.entities.vehicle import Vehicle
+from src.domain.ports.vehicle_repository import VehicleRepository
 
 
 class InMemoryVehicleRepository(VehicleRepository):
@@ -9,7 +9,7 @@ class InMemoryVehicleRepository(VehicleRepository):
 
     def __init__(self) -> None:
         """Initialize repository with empty storage."""
-        self._vehicles: Dict[str, Vehicle] = {}
+        self._vehicles: dict[str, Vehicle] = {}
 
     def _exists(self, vehicle_id: str) -> bool:
         """

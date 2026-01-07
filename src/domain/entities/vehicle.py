@@ -1,5 +1,5 @@
 """Vehicle entity - Domain model."""
-from typing import List
+
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 from src.domain.ports.observer import Observer
 
@@ -25,7 +25,7 @@ class Vehicle:
         self.plate = plate
         self.model = model
         self.current_mileage = current_mileage
-        self._observers: List[Observer] = []
+        self._observers: list[Observer] = []
 
     def attach(self, observer: Observer) -> None:
         """Attach an observer to receive notifications."""
@@ -80,7 +80,8 @@ class Vehicle:
         increment = new_mileage - self.current_mileage
         if increment > self.MAX_MILEAGE_INCREMENT:
             raise InvalidMileageException(
-                f"El incremento de {increment:,} km excede el máximo permitido de {self.MAX_MILEAGE_INCREMENT:,} km"
+                f"El incremento de {increment:,} km excede el máximo permitido de "
+                f"{self.MAX_MILEAGE_INCREMENT:,} km"
             )
 
         old_mileage = self.current_mileage

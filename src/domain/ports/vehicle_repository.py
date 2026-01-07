@@ -1,5 +1,6 @@
 """Vehicle Repository port - following DIP."""
 from abc import ABC, abstractmethod
+
 from src.domain.entities.vehicle import Vehicle
 
 

@@ -1,11 +1,11 @@
 """Update Vehicle Mileage Use Case - Application layer."""
 from datetime import datetime
-from typing import List
-from src.domain.ports.vehicle_repository import VehicleRepository
-from src.domain.ports.alert_repository import AlertRepository
-from src.domain.strategies.maintenance_strategy import MaintenanceStrategy
-from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
+
 from src.domain.entities.maintenance_alert import MaintenanceAlert
+from src.domain.ports.alert_repository import AlertRepository
+from src.domain.ports.vehicle_repository import VehicleRepository
+from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
+from src.domain.strategies.maintenance_strategy import MaintenanceStrategy
 
 
 class UpdateVehicleMileageUseCase:
@@ -15,7 +15,7 @@ class UpdateVehicleMileageUseCase:
         self,
         vehicle_repository: VehicleRepository,
         alert_repository: AlertRepository,
-        strategies: List[MaintenanceStrategy] = None
+        strategies: list[MaintenanceStrategy] = None
     ) -> None:
         """
         Initialize use case with dependencies.
@@ -67,10 +67,11 @@ class UpdateVehicleMileageUseCase:
         # Check maintenance strategies and generate alerts
         for strategy in self._strategies:
             if strategy.should_generate_alert(old_mileage, new_mileage):
+                alert_type = strategy.get_alert_type()
                 alert = MaintenanceAlert(
-                    id=self._generate_alert_id(vehicle_id, new_mileage, strategy.get_alert_type().value),
+                    id=self._generate_alert_id(vehicle_id, new_mileage, alert_type.value),
                     vehicle_id=vehicle_id,
-                    alert_type=strategy.get_alert_type(),
+                    alert_type=alert_type,
                     mileage=new_mileage,
                     timestamp=datetime.now()
                 )

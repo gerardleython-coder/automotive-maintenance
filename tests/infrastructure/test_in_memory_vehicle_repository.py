@@ -1,7 +1,8 @@
 """Tests for InMemoryVehicleRepository following TDD approach."""
 import pytest
-from src.infrastructure.repositories.in_memory_vehicle_repository import InMemoryVehicleRepository
+
 from src.domain.entities.vehicle import Vehicle
+from src.infrastructure.repositories.in_memory_vehicle_repository import InMemoryVehicleRepository
 
 
 class TestInMemoryVehicleRepository:

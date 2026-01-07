@@ -1,5 +1,6 @@
 """Tests for Vehicle entity following TDD approach."""
 import pytest
+
 from src.domain.entities.vehicle import Vehicle
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 from src.domain.ports.observer import Observer

@@ -1,7 +1,8 @@
 """Tests for InMemoryAlertRepository following TDD approach."""
 from datetime import datetime
+
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 from src.infrastructure.repositories.in_memory_alert_repository import InMemoryAlertRepository
-from src.domain.entities.maintenance_alert import MaintenanceAlert, AlertType
 
 
 class TestInMemoryAlertRepository:

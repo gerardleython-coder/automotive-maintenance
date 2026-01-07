@@ -1,9 +1,10 @@
 """Tests for UpdateVehicleMileageUseCase following TDD approach."""
+
 import pytest
-from datetime import datetime
+
 from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 from src.domain.entities.vehicle import Vehicle
-from src.domain.entities.maintenance_alert import MaintenanceAlert, AlertType
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 
 

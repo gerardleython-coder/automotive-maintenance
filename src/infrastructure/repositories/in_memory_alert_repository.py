@@ -1,7 +1,7 @@
 """In-Memory Alert Repository - Infrastructure layer."""
-from typing import List
-from src.domain.ports.alert_repository import AlertRepository
+
 from src.domain.entities.maintenance_alert import MaintenanceAlert
+from src.domain.ports.alert_repository import AlertRepository
 
 
 class InMemoryAlertRepository(AlertRepository):
@@ -15,7 +15,7 @@ class InMemoryAlertRepository(AlertRepository):
 
     def __init__(self) -> None:
         """Initialize repository with empty storage."""
-        self._alerts: List[MaintenanceAlert] = []
+        self._alerts: list[MaintenanceAlert] = []
 
     def save(self, alert: MaintenanceAlert) -> None:
         """
@@ -26,7 +26,7 @@ class InMemoryAlertRepository(AlertRepository):
         """
         self._alerts.append(alert)
 
-    def get_all(self) -> List[MaintenanceAlert]:
+    def get_all(self) -> list[MaintenanceAlert]:
         """
         Get all alerts from repository.
 

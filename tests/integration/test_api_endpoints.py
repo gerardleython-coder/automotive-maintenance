@@ -1,10 +1,7 @@
 """Integration tests for FastAPI endpoints."""
-import pytest
 from fastapi.testclient import TestClient
+
 from src.web.main import app
-from src.infrastructure.repositories.in_memory_vehicle_repository import InMemoryVehicleRepository
-from src.infrastructure.repositories.in_memory_alert_repository import InMemoryAlertRepository
-from src.domain.entities.vehicle import Vehicle
 
 
 class TestVehicleEndpoints:
@@ -18,13 +15,13 @@ class TestVehicleEndpoints:
         """
         # Arrange
         client = TestClient(app)
-        
+
         # Act
         response = client.put(
             "/vehicles/V-123/mileage",
             json={"new_mileage": 8000}
         )
-        
+
         # Assert
         assert response.status_code == 200
         data = response.json()
@@ -39,13 +36,13 @@ class TestVehicleEndpoints:
         """
         # Arrange
         client = TestClient(app)
-        
+
         # Act
         response = client.put(
             "/vehicles/V-123/mileage",
             json={"new_mileage": 4000}
         )
-        
+
         # Assert
         assert response.status_code == 400
         data = response.json()
@@ -59,13 +56,13 @@ class TestVehicleEndpoints:
         """
         # Arrange
         client = TestClient(app)
-        
+
         # Act
         response = client.put(
             "/vehicles/V-999/mileage",
             json={"new_mileage": 10000}
         )
-        
+
         # Assert
         assert response.status_code == 404
         data = response.json()
@@ -79,10 +76,10 @@ class TestVehicleEndpoints:
         """
         # Arrange
         client = TestClient(app)
-        
+
         # Act
         response = client.get("/vehicles/V-123")
-        
+
         # Assert
         assert response.status_code == 200
         data = response.json()
@@ -97,13 +94,13 @@ class TestVehicleEndpoints:
         """
         # Arrange
         client = TestClient(app)
-        
+
         # First trigger an alert by updating mileage
         client.put("/vehicles/V-123/mileage", json={"new_mileage": 10001})
-        
+
         # Act
         response = client.get("/vehicles/V-123/alerts")
-        
+
         # Assert
         assert response.status_code == 200
         data = response.json()

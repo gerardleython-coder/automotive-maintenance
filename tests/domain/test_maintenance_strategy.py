@@ -1,5 +1,4 @@
 """Tests for Maintenance Strategy Pattern following TDD approach."""
-from src.domain.strategies.maintenance_strategy import MaintenanceStrategy
 from src.domain.entities.maintenance_alert import AlertType
 
 

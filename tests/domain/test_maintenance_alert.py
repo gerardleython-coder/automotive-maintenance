@@ -1,6 +1,7 @@
 """Tests for MaintenanceAlert entity following TDD approach."""
 from datetime import datetime
-from src.domain.entities.maintenance_alert import MaintenanceAlert, AlertType
+
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
 
 
 class TestMaintenanceAlertCreation:
