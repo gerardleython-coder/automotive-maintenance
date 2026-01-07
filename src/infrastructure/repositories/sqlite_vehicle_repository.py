@@ -36,6 +36,23 @@ class SqliteVehicleRepository(VehicleRepository):
             current_mileage=vehicle_model.current_mileage,
         )
 
+    def _to_model(self, vehicle: Vehicle) -> VehicleModel:
+        """
+        Convert Vehicle entity to VehicleModel.
+
+        Args:
+            vehicle: Vehicle domain entity
+
+        Returns:
+            VehicleModel instance for persistence
+        """
+        return VehicleModel(
+            id=vehicle.id,
+            plate=vehicle.plate,
+            model=vehicle.model,
+            current_mileage=vehicle.current_mileage,
+        )
+
     def save(self, vehicle: Vehicle) -> None:
         """
         Save vehicle to SQLite database.
@@ -43,12 +60,7 @@ class SqliteVehicleRepository(VehicleRepository):
         Args:
             vehicle: Vehicle entity to save
         """
-        vehicle_model = VehicleModel(
-            id=vehicle.id,
-            plate=vehicle.plate,
-            model=vehicle.model,
-            current_mileage=vehicle.current_mileage,
-        )
+        vehicle_model = self._to_model(vehicle)
         self._db.merge(vehicle_model)
         self._db.commit()
 
