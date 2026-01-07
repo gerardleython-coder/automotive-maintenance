@@ -49,3 +49,42 @@ class TestVehicleMileageUpdate:
         # Act & Assert
         with pytest.raises(InvalidMileageException):
             vehicle.update_mileage(4000)
+
+    def test_update_mileage_with_negative_value_raises_exception(self) -> None:
+        """
+        Given: A vehicle with current mileage
+        When: Attempting to update mileage to negative value (RN-002)
+        Then: System should raise InvalidMileageException
+        """
+        # Arrange
+        vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000)
+
+        # Act & Assert
+        with pytest.raises(InvalidMileageException):
+            vehicle.update_mileage(-100)
+
+    def test_update_mileage_exceeding_limit_raises_exception(self) -> None:
+        """
+        Given: A vehicle with current mileage
+        When: Attempting to update mileage exceeding 1,000,000 km (RN-003)
+        Then: System should raise InvalidMileageException
+        """
+        # Arrange
+        vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota", current_mileage=500000)
+
+        # Act & Assert
+        with pytest.raises(InvalidMileageException):
+            vehicle.update_mileage(1000001)
+
+    def test_update_mileage_with_excessive_increment_raises_exception(self) -> None:
+        """
+        Given: A vehicle with current mileage
+        When: Attempting to update with increment > 50,000 km (RN-004)
+        Then: System should raise InvalidMileageException
+        """
+        # Arrange
+        vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000)
+
+        # Act & Assert
+        with pytest.raises(InvalidMileageException):
+            vehicle.update_mileage(60000)  # Increment of 55,000 km
