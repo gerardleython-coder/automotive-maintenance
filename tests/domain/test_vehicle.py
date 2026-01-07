@@ -126,3 +126,22 @@ class TestVehicleObserverPattern:
         assert len(mock_observer.notifications) == 1
         assert mock_observer.notifications[0]["vehicle_id"] == "V-123"
         assert mock_observer.notifications[0]["mileage"] == 10001
+
+    def test_update_mileage_without_crossing_threshold_no_alert(self) -> None:
+        """
+        Given: A vehicle with 5,000 km and a registered observer
+        When: Updating mileage to 8,000 km (not crossing threshold)
+        Then: Mileage should be updated to 8,000 km
+        And: Observer should NOT be notified
+        """
+        # Arrange
+        vehicle = Vehicle(id="V-123", plate="ABC-123", model="Toyota", current_mileage=5000)
+        mock_observer = MockObserver()
+        vehicle.attach(mock_observer)
+
+        # Act
+        vehicle.update_mileage(8000)
+
+        # Assert
+        assert vehicle.current_mileage == 8000
+        assert len(mock_observer.notifications) == 0
