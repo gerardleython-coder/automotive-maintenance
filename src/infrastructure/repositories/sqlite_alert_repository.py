@@ -73,4 +73,5 @@ class SqliteAlertRepository(AlertRepository):
         Returns:
             List of all MaintenanceAlert entities
         """
-        raise NotImplementedError("To be implemented in next cycle")
+        alert_models = self._db.query(AlertModel).all()
+        return [self._to_entity(alert_model) for alert_model in alert_models]
