@@ -126,3 +126,51 @@ class TestVehicleEndpoints:
         data = response.json()
         assert isinstance(data, list)
         assert len(data) > 0
+
+    def test_create_new_vehicle_successfully(self) -> None:
+        """
+        Given: No vehicle with ID 'V-999' exists
+        When: POST /vehicles with valid data
+        Then: Should return 201 Created with vehicle data
+        """
+        # Arrange
+        client = TestClient(app)
+        new_vehicle_data = {
+            "id": "V-999",
+            "plate": "NEW-999",
+            "model": "Mazda 3",
+            "initial_mileage": 0,
+        }
+
+        # Act
+        response = client.post("/vehicles", json=new_vehicle_data)
+
+        # Assert
+        assert response.status_code == 201
+        data = response.json()
+        assert data["id"] == "V-999"
+        assert data["plate"] == "NEW-999"
+        assert data["model"] == "Mazda 3"
+        assert data["current_mileage"] == 0
+
+    def test_create_vehicle_with_duplicate_id_returns_400(self) -> None:
+        """
+        Given: A vehicle with ID 'V-123' already exists
+        When: POST /vehicles with same ID
+        Then: Should return 400 Bad Request
+        """
+        # Arrange
+        client = TestClient(app)
+        duplicate_vehicle = {
+            "id": "V-123",
+            "plate": "DUP-123",
+            "model": "Duplicate Car",
+            "initial_mileage": 0,
+        }
+
+        # Act
+        response = client.post("/vehicles", json=duplicate_vehicle)
+
+        # Assert
+        assert response.status_code == 400
+        assert "Ya existe un vehículo con ID V-123" in response.json()["detail"]
