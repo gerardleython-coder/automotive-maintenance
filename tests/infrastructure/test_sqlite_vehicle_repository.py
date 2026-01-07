@@ -55,3 +55,30 @@ class TestSqliteVehicleRepository:
         assert saved_vehicle.plate == "ABC-123"
         assert saved_vehicle.model == "Toyota Corolla"
         assert saved_vehicle.current_mileage == 5000
+
+    def test_get_vehicle_by_id_from_database(self, repository, test_db):
+        """
+        Test retrieving a vehicle by ID from SQLite database.
+
+        Given a vehicle saved in the database
+        When get_by_id() is called with the vehicle ID
+        Then the vehicle entity should be returned with correct data
+        """
+        # Arrange
+        from src.infrastructure.database.models import VehicleModel
+
+        vehicle_model = VehicleModel(
+            id="V-456", plate="XYZ-789", model="Honda Civic", current_mileage=15000
+        )
+        test_db.add(vehicle_model)
+        test_db.commit()
+
+        # Act
+        vehicle = repository.get_by_id("V-456")
+
+        # Assert
+        assert vehicle is not None
+        assert vehicle.id == "V-456"
+        assert vehicle.plate == "XYZ-789"
+        assert vehicle.model == "Honda Civic"
+        assert vehicle.current_mileage == 15000
