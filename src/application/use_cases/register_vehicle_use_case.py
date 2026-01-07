@@ -13,7 +13,7 @@ class RegisterVehicleUseCase:
 
     def execute(
         self, vehicle_id: str, plate: str, model: str, initial_mileage: int
-    ) -> None:
+    ) -> Vehicle:
         """
         Register a new vehicle in the system.
 
@@ -22,6 +22,9 @@ class RegisterVehicleUseCase:
             plate: License plate number
             model: Vehicle model name
             initial_mileage: Starting mileage value
+
+        Returns:
+            The registered vehicle entity
 
         Raises:
             ValueError: If vehicle with same ID already exists
@@ -33,3 +36,5 @@ class RegisterVehicleUseCase:
 
         # Save to repository
         self._vehicle_repository.save(vehicle)
+
+        return vehicle
