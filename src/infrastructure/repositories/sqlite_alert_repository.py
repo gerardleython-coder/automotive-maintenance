@@ -63,7 +63,7 @@ class SqliteAlertRepository(AlertRepository):
             alert: MaintenanceAlert entity to save
         """
         alert_model = self._to_model(alert)
-        self._db.add(alert_model)
+        self._db.merge(alert_model)
         self._db.commit()
 
     def get_all(self) -> list[MaintenanceAlert]:
