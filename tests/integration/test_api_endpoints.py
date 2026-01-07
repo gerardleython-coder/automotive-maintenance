@@ -1,7 +1,28 @@
 """Integration tests for FastAPI endpoints."""
+
+import pytest
 from fastapi.testclient import TestClient
 
+from src.domain.entities.vehicle import Vehicle
+from src.web.dependencies import get_alert_repository, get_vehicle_repository
 from src.web.main import app
+
+
+@pytest.fixture(autouse=True)
+def reset_test_vehicle():
+    """Reset test vehicle to initial state before each test."""
+    vehicle_repo = get_vehicle_repository()
+    alert_repo = get_alert_repository()
+
+    # Reset vehicle V-123 to initial state
+    test_vehicle = Vehicle(
+        id="V-123", plate="ABC-123", model="Toyota Corolla", current_mileage=5000
+    )
+    vehicle_repo.save(test_vehicle)
+
+    yield
+
+    # No cleanup needed - SQLite persists between tests intentionally
 
 
 class TestVehicleEndpoints:
