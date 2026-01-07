@@ -4,7 +4,6 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.domain.entities.vehicle import Vehicle
 from src.infrastructure.database.models import Base
 from src.infrastructure.repositories.sqlite_vehicle_repository import SqliteVehicleRepository
 
