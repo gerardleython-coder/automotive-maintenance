@@ -1,5 +1,7 @@
 """Vehicle entity - Domain model."""
+from typing import List
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
+from src.domain.ports.observer import Observer
 
 
 class Vehicle:
@@ -7,6 +9,7 @@ class Vehicle:
 
     MAX_MILEAGE = 1_000_000
     MAX_MILEAGE_INCREMENT = 50_000
+    MAINTENANCE_INTERVAL = 10_000
 
     def __init__(self, id: str, plate: str, model: str, current_mileage: int) -> None:
         """
@@ -22,6 +25,22 @@ class Vehicle:
         self.plate = plate
         self.model = model
         self.current_mileage = current_mileage
+        self._observers: List[Observer] = []
+
+    def attach(self, observer: Observer) -> None:
+        """Attach an observer to receive notifications."""
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        """Detach an observer from notifications."""
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+    def _notify_observers(self) -> None:
+        """Notify all observers about mileage update."""
+        for observer in self._observers:
+            observer.update(self.id, self.current_mileage)
 
     def update_mileage(self, new_mileage: int) -> None:
         """
@@ -49,4 +68,12 @@ class Vehicle:
                 f"El incremento de {increment:,} km excede el máximo permitido de {self.MAX_MILEAGE_INCREMENT:,} km"
             )
 
+        # Check if crosses maintenance threshold
+        old_threshold = (self.current_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
+        new_threshold = (new_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
+
         self.current_mileage = new_mileage
+
+        # Notify observers if maintenance threshold crossed
+        if new_threshold > old_threshold:
+            self._notify_observers()
