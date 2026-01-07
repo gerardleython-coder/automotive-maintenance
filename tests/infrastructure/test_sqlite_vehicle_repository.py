@@ -82,3 +82,17 @@ class TestSqliteVehicleRepository:
         assert vehicle.plate == "XYZ-789"
         assert vehicle.model == "Honda Civic"
         assert vehicle.current_mileage == 15000
+
+    def test_get_nonexistent_vehicle_raises_error(self, repository):
+        """
+        Test that getting a nonexistent vehicle raises ValueError.
+
+        Given an empty database
+        When get_by_id() is called with a nonexistent vehicle ID
+        Then ValueError should be raised with appropriate message
+        """
+        # Act & Assert
+        with pytest.raises(ValueError) as exc_info:
+            repository.get_by_id("V-999")
+
+        assert "Vehicle V-999 not found" in str(exc_info.value)
