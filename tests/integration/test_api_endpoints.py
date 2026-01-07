@@ -9,11 +9,21 @@ from src.web.main import app
 
 
 @pytest.fixture(autouse=True)
-def reset_test_vehicle():
-    """Reset test vehicle to initial state before each test."""
-    vehicle_repo = get_vehicle_repository()
+def reset_test_data():
+    """Reset database to known state before each test."""
+    from src.infrastructure.database.connection import SessionLocal
+    from src.infrastructure.database.models import AlertModel, VehicleModel
 
-    # Reset vehicle V-123 to initial state
+    # Get session
+    session = SessionLocal()
+
+    # Clean all data
+    session.query(AlertModel).delete()
+    session.query(VehicleModel).delete()
+    session.commit()
+
+    # Create test vehicle V-123
+    vehicle_repo = get_vehicle_repository()
     test_vehicle = Vehicle(
         id="V-123", plate="ABC-123", model="Toyota Corolla", current_mileage=5000
     )
@@ -21,7 +31,11 @@ def reset_test_vehicle():
 
     yield
 
-    # No cleanup needed - SQLite persists between tests intentionally
+    # Cleanup after test - remove test data created during test
+    session.query(AlertModel).delete()
+    session.query(VehicleModel).delete()
+    session.commit()
+    session.close()
 
 
 class TestVehicleEndpoints:

@@ -3,7 +3,9 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
+from src.application.use_cases.register_vehicle_use_case import RegisterVehicleUseCase
 from src.application.use_cases.update_vehicle_mileage_use_case import UpdateVehicleMileageUseCase
+from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
 from src.domain.exceptions.invalid_mileage_exception import InvalidMileageException
 from src.domain.strategies.basic_maintenance_strategy import BasicMaintenanceStrategy
 from src.domain.strategies.critical_threshold_strategy import CriticalThresholdStrategy
@@ -12,6 +14,14 @@ from src.web.dependencies import get_alert_repository, get_vehicle_repository, i
 
 
 # DTOs
+class CreateVehicleRequest(BaseModel):
+    """Request model for creating a new vehicle."""
+    id: str = Field(..., description="Unique vehicle identifier")
+    plate: str = Field(..., description="License plate number")
+    model: str = Field(..., description="Vehicle model")
+    initial_mileage: int = Field(..., description="Initial mileage value", ge=0)
+
+
 class UpdateMileageRequest(BaseModel):
     """Request model for updating vehicle mileage."""
     new_mileage: int = Field(..., description="New mileage value", ge=0)
@@ -46,6 +56,39 @@ app = FastAPI(
     description="API for managing vehicle fleet and maintenance alerts",
     version="1.0.0"
 )
+
+
+@app.post("/vehicles", response_model=VehicleResponse, status_code=status.HTTP_201_CREATED)
+def create_vehicle(request: CreateVehicleRequest):
+    """
+    Create a new vehicle.
+
+    Args:
+        request: Vehicle creation data
+
+    Returns:
+        Created vehicle data
+
+    Raises:
+        HTTPException: 400 if vehicle with same ID already exists
+    """
+    try:
+        use_case = RegisterVehicleUseCase(vehicle_repository=get_vehicle_repository())
+        vehicle = use_case.execute(
+            vehicle_id=request.id,
+            plate=request.plate,
+            model=request.model,
+            initial_mileage=request.initial_mileage,
+        )
+
+        return VehicleResponse(
+            id=vehicle.id,
+            plate=vehicle.plate,
+            model=vehicle.model,
+            current_mileage=vehicle.current_mileage,
+        )
+    except DuplicateVehicleException as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.get("/vehicles/{vehicle_id}", response_model=VehicleResponse, status_code=status.HTTP_200_OK)
