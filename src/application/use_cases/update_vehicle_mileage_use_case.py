@@ -29,6 +29,20 @@ class UpdateVehicleMileageUseCase:
         self._alert_repository = alert_repository
         self._strategies = strategies or [BasicMaintenanceStrategy()]
 
+    def _generate_alert_id(self, vehicle_id: str, mileage: int, alert_type_value: str) -> str:
+        """
+        Generate unique alert ID.
+
+        Args:
+            vehicle_id: Vehicle identifier
+            mileage: Mileage value
+            alert_type_value: Alert type value
+
+        Returns:
+            Unique alert identifier
+        """
+        return f"A-{vehicle_id}-{mileage}-{alert_type_value}"
+
     def execute(self, vehicle_id: str, new_mileage: int) -> None:
         """
         Execute the use case to update vehicle mileage.
@@ -54,7 +68,7 @@ class UpdateVehicleMileageUseCase:
         for strategy in self._strategies:
             if strategy.should_generate_alert(old_mileage, new_mileage):
                 alert = MaintenanceAlert(
-                    id=f"A-{vehicle_id}-{new_mileage}-{strategy.get_alert_type().value}",
+                    id=self._generate_alert_id(vehicle_id, new_mileage, strategy.get_alert_type().value),
                     vehicle_id=vehicle_id,
                     alert_type=strategy.get_alert_type(),
                     mileage=new_mileage,
