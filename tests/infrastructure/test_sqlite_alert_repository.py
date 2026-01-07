@@ -1,0 +1,66 @@
+"""Tests for SqliteAlertRepository - Infrastructure layer."""
+
+from datetime import datetime
+
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
+from src.infrastructure.database.models import Base
+from src.infrastructure.repositories.sqlite_alert_repository import (
+    SqliteAlertRepository,
+)
+
+
+@pytest.fixture
+def test_db():
+    """Create clean in-memory SQLite database for each test."""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)()
+    yield session
+    session.close()
+
+
+@pytest.fixture
+def repository(test_db):
+    """Create repository instance with test database."""
+    return SqliteAlertRepository(test_db)
+
+
+class TestSqliteAlertRepository:
+    """Test suite for SqliteAlertRepository."""
+
+    def test_save_alert_to_database(self, repository, test_db):
+        """
+        Test saving an alert to SQLite database.
+
+        Given a valid alert entity
+        When save() is called
+        Then the alert should be persisted in the database
+        """
+        # Arrange
+        alert = MaintenanceAlert(
+            id="V-123-10000-BASIC",
+            vehicle_id="V-123",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=10000,
+            timestamp=datetime(2026, 1, 7, 10, 0, 0),
+        )
+
+        # Act
+        repository.save(alert)
+
+        # Assert
+        from src.infrastructure.database.models import AlertModel
+
+        saved_alert = (
+            test_db.query(AlertModel).filter_by(id="V-123-10000-BASIC").first()
+        )
+        assert saved_alert is not None
+        assert saved_alert.id == "V-123-10000-BASIC"
+        assert saved_alert.vehicle_id == "V-123"
+        assert saved_alert.alert_type == AlertType.BASIC_MAINTENANCE
+        assert saved_alert.mileage == 10000
+        assert saved_alert.timestamp == datetime(2026, 1, 7, 10, 0, 0)
