@@ -19,6 +19,23 @@ class SqliteVehicleRepository(VehicleRepository):
         """
         self._db = db_session
 
+    def _to_entity(self, vehicle_model: VehicleModel) -> Vehicle:
+        """
+        Convert VehicleModel to Vehicle entity.
+
+        Args:
+            vehicle_model: SQLAlchemy model instance
+
+        Returns:
+            Vehicle domain entity
+        """
+        return Vehicle(
+            id=vehicle_model.id,
+            plate=vehicle_model.plate,
+            model=vehicle_model.model,
+            current_mileage=vehicle_model.current_mileage,
+        )
+
     def save(self, vehicle: Vehicle) -> None:
         """
         Save vehicle to SQLite database.
@@ -55,9 +72,4 @@ class SqliteVehicleRepository(VehicleRepository):
         if vehicle_model is None:
             raise ValueError(f"Vehicle {vehicle_id} not found")
 
-        return Vehicle(
-            id=vehicle_model.id,
-            plate=vehicle_model.plate,
-            model=vehicle_model.model,
-            current_mileage=vehicle_model.current_mileage,
-        )
+        return self._to_entity(vehicle_model)
