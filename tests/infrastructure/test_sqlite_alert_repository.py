@@ -104,7 +104,8 @@ class TestSqliteAlertRepository:
 
         # Assert
         assert len(alerts) == 2
-        assert alerts[0].id == "V-123-10000-BASIC"
-        assert alerts[0].alert_type == AlertType.BASIC_MAINTENANCE
-        assert alerts[1].id == "V-123-50000-MAJOR"
-        assert alerts[1].alert_type == AlertType.MAJOR_MAINTENANCE
+        # Orden descendente: más reciente primero (11:00 antes que 10:00)
+        assert alerts[0].id == "V-123-50000-MAJOR"
+        assert alerts[0].alert_type == AlertType.MAJOR_MAINTENANCE
+        assert alerts[1].id == "V-123-10000-BASIC"
+        assert alerts[1].alert_type == AlertType.BASIC_MAINTENANCE

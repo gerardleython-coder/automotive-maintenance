@@ -55,6 +55,18 @@ class SqliteAlertRepository(AlertRepository):
             timestamp=alert.timestamp,
         )
 
+    def _to_entities(self, alert_models: list[AlertModel]) -> list[MaintenanceAlert]:
+        """
+        Convert list of AlertModel to list of MaintenanceAlert entities.
+
+        Args:
+            alert_models: List of SQLAlchemy model instances
+
+        Returns:
+            List of MaintenanceAlert domain entities
+        """
+        return [self._to_entity(model) for model in alert_models]
+
     def save(self, alert: MaintenanceAlert) -> None:
         """
         Save alert to SQLite database.
@@ -68,13 +80,15 @@ class SqliteAlertRepository(AlertRepository):
 
     def get_all(self) -> list[MaintenanceAlert]:
         """
-        Get all alerts from database ordered by timestamp.
+        Get all alerts from database ordered by timestamp descending.
 
         Returns:
-            List of all MaintenanceAlert entities ordered chronologically
+            List of all MaintenanceAlert entities (most recent first)
         """
-        alert_models = self._db.query(AlertModel).order_by(AlertModel.timestamp).all()
-        return [self._to_entity(model) for model in alert_models]
+        alert_models = self._db.query(AlertModel)\
+            .order_by(AlertModel.timestamp.desc())\
+            .all()
+        return self._to_entities(alert_models)
 
     def get_by_vehicle_id(self, vehicle_id: str) -> list[MaintenanceAlert]:
         """
@@ -86,10 +100,8 @@ class SqliteAlertRepository(AlertRepository):
         Returns:
             List of MaintenanceAlert entities for the vehicle (most recent first)
         """
-        alert_models = (
-            self._db.query(AlertModel)
-            .filter_by(vehicle_id=vehicle_id)
-            .order_by(AlertModel.timestamp.desc())
+        alert_models = self._db.query(AlertModel)\
+            .filter_by(vehicle_id=vehicle_id)\
+            .order_by(AlertModel.timestamp.desc())\
             .all()
-        )
-        return [self._to_entity(model) for model in alert_models]
+        return self._to_entities(alert_models)

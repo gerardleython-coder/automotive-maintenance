@@ -53,6 +53,18 @@ class SqliteVehicleRepository(VehicleRepository):
             current_mileage=vehicle.current_mileage,
         )
 
+    def _to_entities(self, vehicle_models: list[VehicleModel]) -> list[Vehicle]:
+        """
+        Convert list of VehicleModel to list of Vehicle entities.
+
+        Args:
+            vehicle_models: List of SQLAlchemy model instances
+
+        Returns:
+            List of Vehicle domain entities
+        """
+        return [self._to_entity(model) for model in vehicle_models]
+
     def save(self, vehicle: Vehicle) -> None:
         """
         Save vehicle to SQLite database.
@@ -94,4 +106,4 @@ class SqliteVehicleRepository(VehicleRepository):
             List of all Vehicle entities
         """
         vehicle_models = self._db.query(VehicleModel).all()
-        return [self._to_entity(model) for model in vehicle_models]
+        return self._to_entities(vehicle_models)
