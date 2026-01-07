@@ -48,4 +48,16 @@ class SqliteVehicleRepository(VehicleRepository):
         Raises:
             ValueError: If vehicle not found
         """
-        raise NotImplementedError("To be implemented in next cycle")
+        vehicle_model = (
+            self._db.query(VehicleModel).filter_by(id=vehicle_id).first()
+        )
+
+        if vehicle_model is None:
+            raise ValueError(f"Vehicle {vehicle_id} not found")
+
+        return Vehicle(
+            id=vehicle_model.id,
+            plate=vehicle_model.plate,
+            model=vehicle_model.model,
+            current_mileage=vehicle_model.current_mileage,
+        )
