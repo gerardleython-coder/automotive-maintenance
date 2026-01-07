@@ -85,3 +85,13 @@ class SqliteVehicleRepository(VehicleRepository):
             raise ValueError(f"Vehicle {vehicle_id} not found")
 
         return self._to_entity(vehicle_model)
+
+    def get_all(self) -> list[Vehicle]:
+        """
+        Get all vehicles from database.
+
+        Returns:
+            List of all Vehicle entities
+        """
+        vehicle_models = self._db.query(VehicleModel).all()
+        return [self._to_entity(model) for model in vehicle_models]

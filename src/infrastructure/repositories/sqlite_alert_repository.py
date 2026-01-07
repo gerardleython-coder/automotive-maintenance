@@ -75,3 +75,21 @@ class SqliteAlertRepository(AlertRepository):
         """
         alert_models = self._db.query(AlertModel).order_by(AlertModel.timestamp).all()
         return [self._to_entity(model) for model in alert_models]
+
+    def get_by_vehicle_id(self, vehicle_id: str) -> list[MaintenanceAlert]:
+        """
+        Get all alerts for a specific vehicle ordered by timestamp descending.
+
+        Args:
+            vehicle_id: Unique identifier of the vehicle
+
+        Returns:
+            List of MaintenanceAlert entities for the vehicle (most recent first)
+        """
+        alert_models = (
+            self._db.query(AlertModel)
+            .filter_by(vehicle_id=vehicle_id)
+            .order_by(AlertModel.timestamp.desc())
+            .all()
+        )
+        return [self._to_entity(model) for model in alert_models]
