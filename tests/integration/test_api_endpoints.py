@@ -299,3 +299,109 @@ class TestVehicleEndpoints:
         # Most recent first (timestamp desc)
         assert vehicle_123["alerts"][0]["id"] == "alert-2"
         assert vehicle_123["alerts"][1]["id"] == "alert-1"
+
+    def test_delete_vehicle_successfully(self) -> None:
+        """
+        Given: A vehicle V-123 exists in the system
+        When: DELETE /vehicles/V-123
+        Then: Should return 204 No Content
+        And: Vehicle should be deleted from database
+        """
+        # Arrange
+        client = TestClient(app)
+
+        # Act
+        response = client.delete("/vehicles/V-123")
+
+        # Assert
+        assert response.status_code == 204
+        assert response.text == ""
+
+        # Verify vehicle was deleted
+        get_response = client.get("/vehicles/V-123")
+        assert get_response.status_code == 404
+
+    def test_delete_nonexistent_vehicle_returns_404(self) -> None:
+        """
+        Given: No vehicle with ID V-NONEXISTENT exists
+        When: DELETE /vehicles/V-NONEXISTENT
+        Then: Should return 404 Not Found with error message
+        """
+        # Arrange
+        client = TestClient(app)
+
+        # Act
+        response = client.delete("/vehicles/V-NONEXISTENT")
+
+        # Assert
+        assert response.status_code == 404
+        assert "Vehículo con ID V-NONEXISTENT no encontrado" in response.json()["detail"]
+
+    def test_delete_vehicle_cascades_alerts(self) -> None:
+        """
+        Given: A vehicle V-777 exists with multiple alerts
+        When: DELETE /vehicles/V-777
+        Then: Should return 204 No Content
+        And: All associated alerts should be deleted (cascade)
+        And: No orphan alerts should remain in database
+        """
+        # Arrange
+        from datetime import datetime
+
+        from src.domain.entities.maintenance_alert import AlertType, MaintenanceAlert
+        from src.domain.entities.vehicle import Vehicle
+        from src.web.dependencies import get_alert_repository, get_vehicle_repository
+
+        client = TestClient(app)
+        vehicle_repo = get_vehicle_repository()
+        alert_repo = get_alert_repository()
+
+        # Create vehicle V-777
+        vehicle = Vehicle(
+            id="V-777", plate="XYZ-777", model="Honda Civic", current_mileage=30000
+        )
+        vehicle_repo.save(vehicle)
+
+        # Create multiple alerts for V-777
+        alert1 = MaintenanceAlert(
+            id="alert-777-1",
+            vehicle_id="V-777",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=10000,
+            timestamp=datetime.now(),
+        )
+        alert2 = MaintenanceAlert(
+            id="alert-777-2",
+            vehicle_id="V-777",
+            alert_type=AlertType.MAJOR_MAINTENANCE,
+            mileage=50000,
+            timestamp=datetime.now(),
+        )
+        alert3 = MaintenanceAlert(
+            id="alert-777-3",
+            vehicle_id="V-777",
+            alert_type=AlertType.CRITICAL_THRESHOLD,
+            mileage=100000,
+            timestamp=datetime.now(),
+        )
+        alert_repo.save(alert1)
+        alert_repo.save(alert2)
+        alert_repo.save(alert3)
+
+        # Verify alerts exist before deletion
+        alerts_before = alert_repo.get_by_vehicle_id("V-777")
+        assert len(alerts_before) == 3
+
+        # Act
+        response = client.delete("/vehicles/V-777")
+
+        # Assert
+        assert response.status_code == 204
+
+        # Verify vehicle deleted
+        get_response = client.get("/vehicles/V-777")
+        assert get_response.status_code == 404
+
+        # Verify alerts cascaded (deleted automatically)
+        alerts_after = alert_repo.get_by_vehicle_id("V-777")
+        assert len(alerts_after) == 0, "No orphan alerts should remain after vehicle deletion"
