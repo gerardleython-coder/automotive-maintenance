@@ -42,6 +42,21 @@ class Vehicle:
         for observer in self._observers:
             observer.update(self.id, self.current_mileage)
 
+    def _crosses_maintenance_threshold(self, old_mileage: int, new_mileage: int) -> bool:
+        """
+        Check if update crosses a maintenance threshold.
+
+        Args:
+            old_mileage: Previous mileage value
+            new_mileage: New mileage value
+
+        Returns:
+            True if crosses a 10,000 km threshold, False otherwise
+        """
+        old_threshold = (old_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
+        new_threshold = (new_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
+        return new_threshold > old_threshold
+
     def update_mileage(self, new_mileage: int) -> None:
         """
         Update vehicle mileage.
@@ -68,12 +83,9 @@ class Vehicle:
                 f"El incremento de {increment:,} km excede el máximo permitido de {self.MAX_MILEAGE_INCREMENT:,} km"
             )
 
-        # Check if crosses maintenance threshold
-        old_threshold = (self.current_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
-        new_threshold = (new_mileage // self.MAINTENANCE_INTERVAL) * self.MAINTENANCE_INTERVAL
-
+        old_mileage = self.current_mileage
         self.current_mileage = new_mileage
 
         # Notify observers if maintenance threshold crossed
-        if new_threshold > old_threshold:
+        if self._crosses_maintenance_threshold(old_mileage, new_mileage):
             self._notify_observers()
