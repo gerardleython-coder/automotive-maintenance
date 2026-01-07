@@ -31,6 +31,8 @@ class Vehicle:
             InvalidMileageException: If new mileage is not greater than current
         """
         if new_mileage <= self.current_mileage:
-            raise InvalidMileageException()
-        
+            raise InvalidMileageException(
+                f"El kilometraje {new_mileage} debe ser mayor al actual {self.current_mileage}"
+            )
+
         self.current_mileage = new_mileage
