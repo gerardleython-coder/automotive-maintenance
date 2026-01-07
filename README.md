@@ -83,6 +83,10 @@ Este proyecto sigue **TDD estricto**. El historial de Git muestra el ciclo RED �
 
 Ver [USER_STORIES.md](USER_STORIES.md) para historias de usuario y criterios de aceptación.
 
+## Diseño UI/UX
+
+Especificaciones de diseño, mockups y guías de estilo en [docs/design/DESIGN.md](docs/design/DESIGN.md)
+
 ## CI/CD
 
 GitHub Actions ejecuta automáticamente:
