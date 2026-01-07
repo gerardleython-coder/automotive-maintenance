@@ -64,3 +64,42 @@ class TestSqliteAlertRepository:
         assert saved_alert.alert_type == AlertType.BASIC_MAINTENANCE
         assert saved_alert.mileage == 10000
         assert saved_alert.timestamp == datetime(2026, 1, 7, 10, 0, 0)
+
+    def test_get_all_alerts_from_database(self, repository, test_db):
+        """
+        Test retrieving all alerts from SQLite database.
+
+        Given multiple alerts saved in the database
+        When get_all() is called
+        Then all alert entities should be returned
+        """
+        # Arrange
+        from src.infrastructure.database.models import AlertModel
+
+        alert1 = AlertModel(
+            id="V-123-10000-BASIC",
+            vehicle_id="V-123",
+            alert_type=AlertType.BASIC_MAINTENANCE,
+            mileage=10000,
+            timestamp=datetime(2026, 1, 7, 10, 0, 0),
+        )
+        alert2 = AlertModel(
+            id="V-123-50000-MAJOR",
+            vehicle_id="V-123",
+            alert_type=AlertType.MAJOR_MAINTENANCE,
+            mileage=50000,
+            timestamp=datetime(2026, 1, 7, 11, 0, 0),
+        )
+        test_db.add(alert1)
+        test_db.add(alert2)
+        test_db.commit()
+
+        # Act
+        alerts = repository.get_all()
+
+        # Assert
+        assert len(alerts) == 2
+        assert alerts[0].id == "V-123-10000-BASIC"
+        assert alerts[0].alert_type == AlertType.BASIC_MAINTENANCE
+        assert alerts[1].id == "V-123-50000-MAJOR"
+        assert alerts[1].alert_type == AlertType.MAJOR_MAINTENANCE
