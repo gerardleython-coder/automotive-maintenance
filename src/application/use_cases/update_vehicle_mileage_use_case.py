@@ -57,13 +57,13 @@ class UpdateVehicleMileageUseCase:
         """
         # Get vehicle
         vehicle = self._vehicle_repository.get_by_id(vehicle_id)
-        
+
         # Store old mileage for strategy evaluation
         old_mileage = vehicle.current_mileage
-        
+
         # Update mileage (domain validation happens here)
         vehicle.update_mileage(new_mileage)
-        
+
         # Check maintenance strategies and generate alerts
         for strategy in self._strategies:
             if strategy.should_generate_alert(old_mileage, new_mileage):
@@ -75,6 +75,6 @@ class UpdateVehicleMileageUseCase:
                     timestamp=datetime.now()
                 )
                 self._alert_repository.save(alert)
-        
+
         # Persist updated vehicle
         self._vehicle_repository.save(vehicle)

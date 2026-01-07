@@ -7,7 +7,7 @@ from src.domain.entities.maintenance_alert import MaintenanceAlert
 class InMemoryAlertRepository(AlertRepository):
     """
     In-memory implementation of AlertRepository for testing and development.
-    
+
     This implementation stores alerts in memory and is suitable for
     testing and development environments. For production, use a persistent
     storage implementation.

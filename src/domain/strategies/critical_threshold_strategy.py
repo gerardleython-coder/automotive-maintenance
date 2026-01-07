@@ -6,7 +6,7 @@ from src.domain.entities.maintenance_alert import AlertType
 class CriticalThresholdStrategy(MaintenanceStrategy):
     """
     Strategy for critical threshold at 100,000 km.
-    
+
     Unlike periodic maintenance strategies, this alert is triggered
     only once when the vehicle crosses the critical threshold.
     """
@@ -17,7 +17,7 @@ class CriticalThresholdStrategy(MaintenanceStrategy):
     def should_generate_alert(self, old_mileage: int, new_mileage: int) -> bool:
         """
         Check if vehicle crosses the critical 100,000 km threshold.
-        
+
         This alert is generated only once when crossing the threshold,
         not on subsequent mileage updates beyond 100,000 km.
 
