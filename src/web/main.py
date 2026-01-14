@@ -1,8 +1,8 @@
 """FastAPI application - Web layer."""
 
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, ConfigDict, Field
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.application.use_cases.delete_vehicle_use_case import DeleteVehicleUseCase
 from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase

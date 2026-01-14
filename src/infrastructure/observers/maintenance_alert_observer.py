@@ -1,9 +1,10 @@
 """Observer real para generación y persistencia de alertas de mantenimiento."""
-from src.domain.ports.observer import Observer
-from src.domain.strategies.maintenance_strategy import MaintenanceStrategy
+from datetime import datetime
+
 from src.domain.entities.maintenance_alert import MaintenanceAlert
 from src.domain.ports.alert_repository import AlertRepository
-from datetime import datetime
+from src.domain.ports.observer import Observer
+from src.domain.strategies.maintenance_strategy import MaintenanceStrategy
 
 
 class MaintenanceAlertObserver(Observer):
