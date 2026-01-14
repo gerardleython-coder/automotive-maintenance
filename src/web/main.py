@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.application.use_cases.delete_vehicle_use_case import DeleteVehicleUseCase
 from src.application.use_cases.get_all_vehicles_use_case import GetAllVehiclesUseCase
@@ -81,7 +82,6 @@ app = FastAPI(
 )
 
 # --- CORS Middleware ---
-from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # O restringe a ["http://127.0.0.1:8080"] si prefieres
