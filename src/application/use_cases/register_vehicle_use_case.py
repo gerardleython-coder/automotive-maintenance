@@ -11,9 +11,11 @@ from src.domain.ports.vehicle_repository import VehicleRepository
 class RegisterVehicleUseCase:
     """Use case for registering a new vehicle."""
 
-    def __init__(self, vehicle_repository: VehicleRepository):
-        """Initialize use case with repository dependency."""
+    def __init__(self, vehicle_repository: VehicleRepository, alert_repository=None, strategies=None):
+        """Initialize use case with repository and alert dependencies."""
         self._vehicle_repository = vehicle_repository
+        self._alert_repository = alert_repository
+        self._strategies = strategies or []
 
     def execute(
         self, vehicle_id: str, plate: str, model: str, initial_mileage: int
@@ -48,5 +50,32 @@ class RegisterVehicleUseCase:
 
         # Save to repository
         self._vehicle_repository.save(vehicle)
+
+        # Extensión: Generar alertas omitidas si el kilometraje inicial cruza umbrales
+        if self._alert_repository and self._strategies:
+            for strategy in self._strategies:
+                old_threshold = strategy._calculate_threshold(0)
+                new_threshold = strategy._calculate_threshold(initial_mileage)
+                interval = strategy.INTERVAL
+                alert_type = strategy.get_alert_type()
+                if new_threshold > old_threshold:
+                    for threshold in range(old_threshold + interval, new_threshold + 1, interval):
+                        from src.domain.entities.maintenance_alert import MaintenanceAlert
+                        from datetime import datetime
+                        # Verificar si ya existe una alerta para ese vehículo, tipo y kilometraje
+                        existentes = self._alert_repository.get_by_vehicle_id(vehicle_id)
+                        ya_existe = any(
+                            a.alert_type == alert_type and a.mileage == threshold
+                            for a in existentes
+                        )
+                        if not ya_existe:
+                            alert = MaintenanceAlert(
+                                id=f"A-{vehicle_id}-{threshold}-{alert_type.value}",
+                                vehicle_id=vehicle_id,
+                                alert_type=alert_type,
+                                mileage=threshold,
+                                timestamp=datetime.now()
+                            )
+                            self._alert_repository.save(alert)
 
         return vehicle
