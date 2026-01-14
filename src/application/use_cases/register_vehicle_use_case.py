@@ -1,10 +1,10 @@
 """Use case for registering a new vehicle in the system."""
 
 from src.domain.entities.vehicle import Vehicle
-from src.domain.exceptions.duplicate_vehicle_exception import DuplicateVehicleException
-from src.domain.exceptions.vehicle_not_found_exception import (
-    VehicleNotFoundException,
+from src.domain.exceptions.duplicate_vehicle_exception import (
+    DuplicateVehicleException,
 )
+from src.domain.exceptions.vehicle_not_found_exception import VehicleNotFoundException
 from src.domain.ports.vehicle_repository import VehicleRepository
 
 
@@ -67,7 +67,7 @@ class RegisterVehicleUseCase:
                         ya_existe = any(
                             a.alert_type == alert_type and a.mileage == threshold
                             for a in existentes
-                        )
+                        )  # noqa: E501
                         if not ya_existe:
                             alert = MaintenanceAlert(
                                 id=f"A-{vehicle_id}-{threshold}-{alert_type.value}",
