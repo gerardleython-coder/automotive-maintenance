@@ -2,6 +2,17 @@
 
 Sistema de gestión de flota de vehículos con monitoreo de kilometraje y alertas automáticas de mantenimiento.
 
+---
+
+## 🚀 Colección Postman
+
+Incluye una colección lista para importar y ejecutar en Postman, cubriendo todos los endpoints, reglas de negocio y escenarios del reto.
+
+- Archivo: `postman/automotive-maintenance.postman_collection.json`
+- Instrucciones: ver `postman/README.md`
+
+---
+
 ## Descripción
 
 Sistema que implementa **Arquitectura Hexagonal** con **TDD estricto** para gestionar una flota de vehículos, monitoreando el kilometraje y generando alertas automáticas cuando se requiere mantenimiento.
@@ -38,6 +49,8 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
+---
+
 ## Ejecución de Pruebas
 
 ```bash
@@ -61,6 +74,10 @@ src/
 └── web/              # API REST (FastAPI)
 ```
 
+La explicación detallada de los patrones y la arquitectura se encuentra en este README y en los módulos de `src/domain` y `src/application`.
+
+---
+
 ### API REST
 
 **Endpoints disponibles:**
@@ -71,17 +88,26 @@ src/
 - `GET /vehicles` - Listar todos los vehículos con alertas
 - `DELETE /vehicles/{id}` - Eliminar vehículo (con cascade de alertas)
 
+**Documentación interactiva (OpenAPI/Swagger):**
+- [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
 ## Patrones de Diseño
 
 - **Observer Pattern**: Sistema de eventos para alertas de mantenimiento
 - **Strategy Pattern**: Reglas de mantenimiento extensibles
 - **Repository Pattern**: Abstracción de persistencia (DIP)
 
+La documentación de los patrones y su implementación se encuentra explicada en este README y en los módulos de dominio y aplicación.
+
 ## Desarrollo
 
 Este proyecto sigue **TDD estricto**. El historial de Git muestra el ciclo RED → GREEN → REFACTOR.
 
 Ver [USER_STORIES.md](USER_STORIES.md) para historias de usuario y criterios de aceptación.
+
+---
 
 ## CI/CD
 
@@ -102,3 +128,5 @@ GitHub Actions ejecuta automáticamente:
 - 46 tests pasando
 - 95.96% cobertura de código
 - 0 errores de linter
+
+---

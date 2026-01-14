@@ -73,10 +73,21 @@ class VehicleWithAlertsResponse(BaseModel):
 initialize_test_data()
 
 # Create app
+
 app = FastAPI(
     title="Automotive Fleet Management API",
     description="API for managing vehicle fleet and maintenance alerts",
     version="1.0.0",
+)
+
+# --- CORS Middleware ---
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # O restringe a ["http://127.0.0.1:8080"] si prefieres
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
