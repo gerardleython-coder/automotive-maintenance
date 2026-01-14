@@ -1,6 +1,7 @@
 """FastAPI application - Web layer."""
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.application.use_cases.delete_vehicle_use_case import DeleteVehicleUseCase
@@ -79,6 +80,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Helper functions for DTO mapping
 def _map_alert_to_response(alert: MaintenanceAlert) -> AlertResponse:
@@ -119,7 +129,15 @@ def create_vehicle(request: CreateVehicleRequest):
         HTTPException: 400 if vehicle with same ID already exists
     """
     try:
-        use_case = RegisterVehicleUseCase(vehicle_repository=get_vehicle_repository())
+        use_case = RegisterVehicleUseCase(
+            vehicle_repository=get_vehicle_repository(),
+            alert_repository=get_alert_repository(),
+            strategies=[
+                BasicMaintenanceStrategy(),
+                MajorMaintenanceStrategy(),
+                CriticalThresholdStrategy()
+            ]
+        )
         vehicle = use_case.execute(
             vehicle_id=request.id,
             plate=request.plate,

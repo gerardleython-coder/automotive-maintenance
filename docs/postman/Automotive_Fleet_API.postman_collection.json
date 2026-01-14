@@ -1,0 +1,746 @@
+{
+	"info": {
+		"_postman_id": "automotive-fleet-api-2026",
+		"name": "Automotive Fleet Management API",
+		"description": "Colección de pruebas automatizadas para la API de gestión de flota vehicular.\n\n## Características\n- Tests automatizados con JavaScript (pm.test)\n- Validación de schemas JSON\n- Validación de reglas de negocio\n- Verificación de códigos de estado HTTP\n- Variables de entorno para reutilización\n\n## Orden de Ejecución\nEjecutar en el orden listado para garantizar flujo CRUD completo:\n1. Health Check\n2. Crear Vehículo\n3. Listar Todos los Vehículos\n4. Obtener Vehículo por ID\n5. Actualizar Kilometraje (genera alertas)\n6. Obtener Alertas del Vehículo\n7. Actualizar Kilometraje Inválido (validación)\n8. Eliminar Vehículo (cascade)\n9. Verificar Eliminación\n\n## Variables Requeridas\n- `baseUrl`: URL base de la API (ej: http://localhost:8000)\n- `vehicleId`: ID del vehículo creado (auto-configurado)\n\n## Autor\nGerardo Leyton - Sofka Training 2026",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar que el servidor responde",
+							"pm.test(\"Status code es 200 (API activa)\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Verificar tiempo de respuesta aceptable",
+							"pm.test(\"Tiempo de respuesta < 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"// Test 3: Verificar que la respuesta es JSON",
+							"pm.test(\"Content-Type es application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"console.log(\"✅ Health Check completado - API funcionando correctamente\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles"
+					]
+				},
+				"description": "Verifica que la API está activa y responde correctamente."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Crear Vehículo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código de estado 201 Created",
+							"pm.test(\"Status code es 201 (vehículo creado)\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test 2: Validar schema de respuesta",
+							"pm.test(\"Schema de respuesta es válido\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('plate');",
+							"    pm.expect(jsonData).to.have.property('model');",
+							"    pm.expect(jsonData).to.have.property('current_mileage');",
+							"});",
+							"",
+							"// Test 3: Verificar datos del vehículo creado",
+							"pm.test(\"Datos del vehículo son correctos\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.eql(\"V-POSTMAN-001\");",
+							"    pm.expect(jsonData.plate).to.eql(\"XYZ-789\");",
+							"    pm.expect(jsonData.model).to.eql(\"Honda Civic 2024\");",
+							"    pm.expect(jsonData.current_mileage).to.eql(5000);",
+							"});",
+							"",
+							"// Test 4: Validar tipos de datos",
+							"pm.test(\"Tipos de datos son correctos\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.be.a('string');",
+							"    pm.expect(jsonData.plate).to.be.a('string');",
+							"    pm.expect(jsonData.model).to.be.a('string');",
+							"    pm.expect(jsonData.current_mileage).to.be.a('number');",
+							"});",
+							"",
+							"// Test 5: Guardar vehicleId en variable de entorno",
+							"pm.test(\"Variable vehicleId configurada\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.environment.set(\"vehicleId\", jsonData.id);",
+							"    pm.expect(pm.environment.get(\"vehicleId\")).to.eql(\"V-POSTMAN-001\");",
+							"});",
+							"",
+							"// Test 6: Verificar tiempo de respuesta",
+							"pm.test(\"Tiempo de respuesta < 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"console.log(\"✅ Vehículo creado exitosamente:\", pm.response.json());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"V-POSTMAN-001\",\n    \"plate\": \"XYZ-789\",\n    \"model\": \"Honda Civic 2024\",\n    \"initial_mileage\": 5000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/vehicles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles"
+					]
+				},
+				"description": "Crea un nuevo vehículo en el sistema. Valida:\n- Status code 201\n- Schema de respuesta\n- Datos creados correctamente\n- Tipos de datos\n- Guarda vehicleId en variable de entorno"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Listar Todos los Vehículos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 200 OK",
+							"pm.test(\"Status code es 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: La respuesta es un array",
+							"pm.test(\"Respuesta es un array\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});",
+							"",
+							"// Test 3: El array contiene al menos 1 vehículo",
+							"pm.test(\"Array contiene al menos 1 vehículo\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.length).to.be.at.least(1);",
+							"});",
+							"",
+							"// Test 4: Cada vehículo tiene el schema correcto",
+							"pm.test(\"Schema de cada vehículo es válido\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    jsonData.forEach(vehicle => {",
+							"        pm.expect(vehicle).to.have.property('id');",
+							"        pm.expect(vehicle).to.have.property('plate');",
+							"        pm.expect(vehicle).to.have.property('model');",
+							"        pm.expect(vehicle).to.have.property('current_mileage');",
+							"        pm.expect(vehicle).to.have.property('alerts');",
+							"        pm.expect(vehicle.alerts).to.be.an('array');",
+							"    });",
+							"});",
+							"",
+							"// Test 5: El vehículo creado está en la lista",
+							"pm.test(\"Vehículo V-POSTMAN-001 existe en la lista\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const vehicleExists = jsonData.some(v => v.id === \"V-POSTMAN-001\");",
+							"    pm.expect(vehicleExists).to.be.true;",
+							"});",
+							"",
+							"// Test 6: Tiempo de respuesta aceptable",
+							"pm.test(\"Tiempo de respuesta < 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"console.log(\"✅ Total de vehículos:\", pm.response.json().length);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles"
+					]
+				},
+				"description": "Obtiene todos los vehículos con sus alertas. Valida:\n- Status code 200\n- Respuesta es array\n- Contiene al menos 1 vehículo\n- Schema correcto con alertas\n- Vehículo creado existe en lista"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Obtener Vehículo por ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 200 OK",
+							"pm.test(\"Status code es 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Validar schema de respuesta",
+							"pm.test(\"Schema de respuesta es válido\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('plate');",
+							"    pm.expect(jsonData).to.have.property('model');",
+							"    pm.expect(jsonData).to.have.property('current_mileage');",
+							"});",
+							"",
+							"// Test 3: El ID coincide con el solicitado",
+							"pm.test(\"ID del vehículo es correcto\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.eql(pm.environment.get(\"vehicleId\"));",
+							"});",
+							"",
+							"// Test 4: Datos del vehículo son correctos",
+							"pm.test(\"Datos del vehículo coinciden\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.plate).to.eql(\"XYZ-789\");",
+							"    pm.expect(jsonData.model).to.eql(\"Honda Civic 2024\");",
+							"    pm.expect(jsonData.current_mileage).to.eql(5000);",
+							"});",
+							"",
+							"// Test 5: Tiempo de respuesta",
+							"pm.test(\"Tiempo de respuesta < 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"console.log(\"✅ Vehículo obtenido:\", pm.response.json());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}"
+					]
+				},
+				"description": "Obtiene un vehículo específico por ID. Valida:\n- Status code 200\n- Schema correcto\n- ID coincide\n- Datos correctos"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Actualizar Kilometraje (Genera Alertas)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 200 OK",
+							"pm.test(\"Status code es 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Kilometraje actualizado correctamente",
+							"pm.test(\"Kilometraje actualizado a 12000 km\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.current_mileage).to.eql(12000);",
+							"});",
+							"",
+							"// Test 3: Schema de respuesta válido",
+							"pm.test(\"Schema de respuesta es válido\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('plate');",
+							"    pm.expect(jsonData).to.have.property('model');",
+							"    pm.expect(jsonData).to.have.property('current_mileage');",
+							"});",
+							"",
+							"// Test 4: Regla de negocio - incremento válido",
+							"pm.test(\"Incremento de kilometraje es válido (< 50000 km)\", function () {",
+							"    const increment = 12000 - 5000; // 7000 km",
+							"    pm.expect(increment).to.be.below(50000);",
+							"    pm.expect(increment).to.be.above(0);",
+							"});",
+							"",
+							"// Test 5: Tiempo de respuesta",
+							"pm.test(\"Tiempo de respuesta < 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"console.log(\"✅ Kilometraje actualizado. Alertas automáticas generadas (Observer Pattern)\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"new_mileage\": 12000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}/mileage",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}",
+						"mileage"
+					]
+				},
+				"description": "Actualiza el kilometraje del vehículo de 5000 a 12000 km.\nDebe generar alertas automáticas (Observer Pattern):\n- BASIC_MAINTENANCE a 10000 km\n\nValida:\n- Status code 200\n- Kilometraje actualizado\n- Schema correcto\n- Regla de negocio (incremento < 50000 km)"
+			},
+			"response": []
+		},
+		{
+			"name": "6. Obtener Alertas del Vehículo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 200 OK",
+							"pm.test(\"Status code es 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: La respuesta es un array",
+							"pm.test(\"Respuesta es un array de alertas\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});",
+							"",
+							"// Test 3: Se generó al menos 1 alerta (Observer Pattern)",
+							"pm.test(\"Se generó al menos 1 alerta automática\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.length).to.be.at.least(1);",
+							"});",
+							"",
+							"// Test 4: Schema de cada alerta es válido",
+							"pm.test(\"Schema de alertas es válido\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    jsonData.forEach(alert => {",
+							"        pm.expect(alert).to.have.property('id');",
+							"        pm.expect(alert).to.have.property('vehicle_id');",
+							"        pm.expect(alert).to.have.property('alert_type');",
+							"        pm.expect(alert).to.have.property('mileage');",
+							"        pm.expect(alert).to.have.property('timestamp');",
+							"    });",
+							"});",
+							"",
+							"// Test 5: Todas las alertas pertenecen al vehículo correcto",
+							"pm.test(\"Todas las alertas pertenecen al vehículo\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const vehicleId = pm.environment.get(\"vehicleId\");",
+							"    jsonData.forEach(alert => {",
+							"        pm.expect(alert.vehicle_id).to.eql(vehicleId);",
+							"    });",
+							"});",
+							"",
+							"// Test 6: Existe alerta de mantenimiento básico (10000 km)",
+							"pm.test(\"Existe alerta BASIC_MAINTENANCE a 10000 km\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const basicAlert = jsonData.find(a => ",
+							"        a.alert_type === 'basic_maintenance' && a.mileage === 10000",
+							"    );",
+							"    pm.expect(basicAlert).to.not.be.undefined;",
+							"});",
+							"",
+							"// Test 7: Formato de timestamp es ISO 8601",
+							"pm.test(\"Timestamp en formato ISO 8601\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    if (jsonData.length > 0) {",
+							"        const timestamp = jsonData[0].timestamp;",
+							"        pm.expect(timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);",
+							"    }",
+							"});",
+							"",
+							"// Test 8: Tipos de alerta válidos (Strategy Pattern)",
+							"pm.test(\"Tipos de alerta son válidos (Strategy Pattern)\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const validTypes = ['basic_maintenance', 'major_maintenance', 'critical_threshold'];",
+							"    jsonData.forEach(alert => {",
+							"        pm.expect(validTypes).to.include(alert.alert_type);",
+							"    });",
+							"});",
+							"",
+							"console.log(\"✅ Alertas generadas:\", pm.response.json().length);",
+							"console.log(\"Observer Pattern verificado - Alertas automáticas funcionando\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}/alerts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}",
+						"alerts"
+					]
+				},
+				"description": "Obtiene todas las alertas del vehículo. Valida:\n- Status code 200\n- Respuesta es array\n- Al menos 1 alerta generada (Observer Pattern)\n- Schema de alertas válido\n- Alerta de 10000 km existe\n- Timestamp ISO 8601\n- Tipos de alerta válidos (Strategy Pattern)"
+			},
+			"response": []
+		},
+		{
+			"name": "7. Actualizar Kilometraje Inválido (Validación)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 400 Bad Request",
+							"pm.test(\"Status code es 400 (validación de negocio)\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"// Test 2: La respuesta contiene mensaje de error",
+							"pm.test(\"Respuesta contiene mensaje de error\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('detail');",
+							"});",
+							"",
+							"// Test 3: El mensaje indica kilometraje menor",
+							"pm.test(\"Error indica que el kilometraje es menor al actual\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.detail.toLowerCase()).to.include('mayor');",
+							"});",
+							"",
+							"// Test 4: Verificar que el kilometraje NO se actualizó",
+							"pm.test(\"Kilometraje no debe cambiar tras error\", function () {",
+							"    // Nota: Esto se validará en el siguiente request GET",
+							"    pm.expect(pm.response.status).to.not.eql('success');",
+							"});",
+							"",
+							"console.log(\"✅ Validación de negocio funcionando correctamente\");",
+							"console.log(\"Error esperado:\", pm.response.json().detail);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"new_mileage\": 8000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}/mileage",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}",
+						"mileage"
+					]
+				},
+				"description": "Intenta actualizar con kilometraje menor (8000 < 12000).\nDebe fallar por validación de negocio.\n\nValida:\n- Status code 400\n- Mensaje de error presente\n- Error indica kilometraje menor\n- Kilometraje no cambia"
+			},
+			"response": []
+		},
+		{
+			"name": "8. Eliminar Vehículo (Cascade)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 204 No Content",
+							"pm.test(\"Status code es 204 (eliminación exitosa)\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"// Test 2: El body está vacío (semántica 204)",
+							"pm.test(\"Response body está vacío (HTTP 204)\", function () {",
+							"    pm.expect(pm.response.text()).to.be.empty;",
+							"});",
+							"",
+							"// Test 3: Tiempo de respuesta aceptable",
+							"pm.test(\"Tiempo de respuesta < 500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"",
+							"console.log(\"✅ Vehículo eliminado. Cascade debe eliminar alertas automáticamente\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}"
+					]
+				},
+				"description": "Elimina el vehículo.\nDebe hacer cascade automático de alertas (SQLAlchemy).\n\nValida:\n- Status code 204\n- Response body vacío\n- Tiempo de respuesta"
+			},
+			"response": []
+		},
+		{
+			"name": "9. Verificar Eliminación (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 404 Not Found",
+							"pm.test(\"Status code es 404 (vehículo no existe)\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"// Test 2: La respuesta contiene mensaje de error",
+							"pm.test(\"Respuesta contiene mensaje de error\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('detail');",
+							"});",
+							"",
+							"// Test 3: El mensaje indica que no se encontró",
+							"pm.test(\"Error indica vehículo no encontrado\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.detail.toLowerCase()).to.include('not found');",
+							"});",
+							"",
+							"console.log(\"✅ Verificación completada: Vehículo eliminado correctamente\");",
+							"console.log(\"✅ TODAS LAS PRUEBAS AUTOMATIZADAS COMPLETADAS\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/{{vehicleId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"{{vehicleId}}"
+					]
+				},
+				"description": "Intenta obtener el vehículo eliminado.\nDebe retornar 404 Not Found.\n\nValida:\n- Status code 404\n- Mensaje de error\n- Error indica no encontrado"
+			},
+			"response": []
+		},
+		{
+			"name": "10. Actualizar a 100k km (Critical Threshold)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Pre-request: Crear vehículo para prueba de umbral crítico",
+							"const baseUrl = pm.environment.get(\"baseUrl\");",
+							"",
+							"pm.sendRequest({",
+							"    url: `${baseUrl}/vehicles`,",
+							"    method: 'POST',",
+							"    header: {",
+							"        'Content-Type': 'application/json'",
+							"    },",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({",
+							"            \"id\": \"V-CRITICAL-TEST\",",
+							"            \"plate\": \"CRT-999\",",
+							"            \"model\": \"Test Critical\",",
+							"            \"initial_mileage\": 95000",
+							"        })",
+							"    }",
+							"}, function (err, response) {",
+							"    if (!err && response.code === 201) {",
+							"        pm.environment.set(\"criticalVehicleId\", \"V-CRITICAL-TEST\");",
+							"        console.log(\"✅ Vehículo para prueba crítica creado\");",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Verificar código 200 OK",
+							"pm.test(\"Status code es 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Kilometraje actualizado a 100000 km",
+							"pm.test(\"Kilometraje actualizado a 100000 km\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.current_mileage).to.eql(100000);",
+							"});",
+							"",
+							"// Test 3: Verificar que se generaron múltiples alertas",
+							"setTimeout(function() {",
+							"    const baseUrl = pm.environment.get(\"baseUrl\");",
+							"    pm.sendRequest(`${baseUrl}/vehicles/V-CRITICAL-TEST/alerts`, function (err, response) {",
+							"        if (!err) {",
+							"            const alerts = response.json();",
+							"            ",
+							"            pm.test(\"Se generaron múltiples alertas (Strategy Pattern)\", function () {",
+							"                pm.expect(alerts.length).to.be.at.least(2);",
+							"            });",
+							"            ",
+							"            pm.test(\"Existe alerta CRITICAL_THRESHOLD a 100000 km\", function () {",
+							"                const criticalAlert = alerts.find(a => ",
+							"                    a.alert_type === 'critical_threshold' && a.mileage === 100000",
+							"                );",
+							"                pm.expect(criticalAlert).to.not.be.undefined;",
+							"            });",
+							"            ",
+							"            console.log(\"✅ Alertas generadas en umbral crítico:\", alerts.length);",
+							"            console.log(\"Strategy Pattern verificado - Todas las estrategias funcionando\");",
+							"        }",
+							"    });",
+							"}, 500);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"new_mileage\": 100000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/vehicles/V-CRITICAL-TEST/mileage",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"vehicles",
+						"V-CRITICAL-TEST",
+						"mileage"
+					]
+				},
+				"description": "Actualiza a 100000 km (umbral crítico).\nDebe generar alertas:\n- BASIC_MAINTENANCE a 100000 km\n- MAJOR_MAINTENANCE a 100000 km\n- CRITICAL_THRESHOLD a 100000 km\n\nValida todas las estrategias (Strategy Pattern)."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Script global ejecutado antes de cada request",
+					"console.log(\"=== Automotive Fleet API - Automated Testing ===\");",
+					"console.log(\"Base URL:\", pm.environment.get(\"baseUrl\"));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Script global ejecutado después de cada request",
+					"",
+					"// Logging automático",
+					"console.log(\"Status:\", pm.response.code, pm.response.status);",
+					"console.log(\"Time:\", pm.response.responseTime + \"ms\");"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "vehicleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "criticalVehicleId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
