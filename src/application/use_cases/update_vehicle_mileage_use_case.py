@@ -64,18 +64,24 @@ class UpdateVehicleMileageUseCase:
         # Update mileage (domain validation happens here)
         vehicle.update_mileage(new_mileage)
 
-        # Check maintenance strategies and generate alerts
+        # Extensión: Generar TODAS las alertas omitidas por cada estrategia
         for strategy in self._strategies:
-            if strategy.should_generate_alert(old_mileage, new_mileage):
-                alert_type = strategy.get_alert_type()
-                alert = MaintenanceAlert(
-                    id=self._generate_alert_id(vehicle_id, new_mileage, alert_type.value),
-                    vehicle_id=vehicle_id,
-                    alert_type=alert_type,
-                    mileage=new_mileage,
-                    timestamp=datetime.now()
-                )
-                self._alert_repository.save(alert)
+            old_threshold = strategy._calculate_threshold(old_mileage)
+            new_threshold = strategy._calculate_threshold(new_mileage)
+            interval = strategy.INTERVAL
+            alert_type = strategy.get_alert_type()
+            # Si se cruzaron umbrales
+            if new_threshold > old_threshold:
+                # Generar una alerta por cada umbral cruzado
+                for threshold in range(old_threshold + interval, new_threshold + 1, interval):
+                    alert = MaintenanceAlert(
+                        id=self._generate_alert_id(vehicle_id, threshold, alert_type.value),
+                        vehicle_id=vehicle_id,
+                        alert_type=alert_type,
+                        mileage=threshold,
+                        timestamp=datetime.now()
+                    )
+                    self._alert_repository.save(alert)
 
         # Persist updated vehicle
         self._vehicle_repository.save(vehicle)

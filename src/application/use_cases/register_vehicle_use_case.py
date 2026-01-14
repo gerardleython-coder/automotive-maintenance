@@ -2,19 +2,26 @@
 
 from datetime import datetime
 
-from src.domain.entities.vehicle import Vehicle
 from src.domain.entities.maintenance_alert import MaintenanceAlert
+from src.domain.entities.vehicle import Vehicle
 from src.domain.exceptions.duplicate_vehicle_exception import (
     DuplicateVehicleException,
 )
-from src.domain.exceptions.vehicle_not_found_exception import VehicleNotFoundException
+from src.domain.exceptions.vehicle_not_found_exception import (
+    VehicleNotFoundException,
+)
 from src.domain.ports.vehicle_repository import VehicleRepository
 
 
 class RegisterVehicleUseCase:
     """Use case for registering a new vehicle."""
 
-    def __init__(self, vehicle_repository: VehicleRepository, alert_repository=None, strategies=None):
+    def __init__(
+        self,
+        vehicle_repository: VehicleRepository,
+        alert_repository=None,
+        strategies=None,
+    ):
         """Initialize use case with repository and alert dependencies."""
         self._vehicle_repository = vehicle_repository
         self._alert_repository = alert_repository
@@ -73,11 +80,14 @@ class RegisterVehicleUseCase:
                         )
                         if not ya_existe:
                             alert = MaintenanceAlert(
-                                id=f"A-{vehicle_id}-{threshold}-{alert_type.value}",
+                                id=(
+                                    f"A-{vehicle_id}-{threshold}-"
+                                    f"{alert_type.value}"
+                                ),
                                 vehicle_id=vehicle_id,
                                 alert_type=alert_type,
                                 mileage=threshold,
-                                timestamp=datetime.now()
+                                timestamp=datetime.now(),
                             )
                             self._alert_repository.save(alert)
 
