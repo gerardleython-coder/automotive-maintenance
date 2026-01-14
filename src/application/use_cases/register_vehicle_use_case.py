@@ -1,6 +1,9 @@
 """Use case for registering a new vehicle in the system."""
 
+from datetime import datetime
+
 from src.domain.entities.vehicle import Vehicle
+from src.domain.entities.maintenance_alert import MaintenanceAlert
 from src.domain.exceptions.duplicate_vehicle_exception import (
     DuplicateVehicleException,
 )
@@ -59,15 +62,15 @@ class RegisterVehicleUseCase:
                 interval = strategy.INTERVAL
                 alert_type = strategy.get_alert_type()
                 if new_threshold > old_threshold:
-                    for threshold in range(old_threshold + interval, new_threshold + 1, interval):
-                        from src.domain.entities.maintenance_alert import MaintenanceAlert
-                        from datetime import datetime
+                    for threshold in range(
+                        old_threshold + interval, new_threshold + 1, interval
+                    ):
                         # Verificar si ya existe una alerta para ese vehículo, tipo y kilometraje
                         existentes = self._alert_repository.get_by_vehicle_id(vehicle_id)
                         ya_existe = any(
                             a.alert_type == alert_type and a.mileage == threshold
                             for a in existentes
-                        )  # noqa: E501
+                        )
                         if not ya_existe:
                             alert = MaintenanceAlert(
                                 id=f"A-{vehicle_id}-{threshold}-{alert_type.value}",
