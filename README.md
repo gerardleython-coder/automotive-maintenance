@@ -87,6 +87,31 @@ Ver [USER_STORIES.md](USER_STORIES.md) para historias de usuario y criterios de 
 
 Especificaciones de diseño, mockups y guías de estilo en [docs/design/DESIGN.md](docs/design/DESIGN.md)
 
+## Pruebas Automatizadas con Postman
+
+Colección de **60+ tests automatizados** que validan:
+- ✅ Status codes HTTP (200, 201, 204, 400, 404)
+- ✅ Schemas JSON de respuestas
+- ✅ Reglas de negocio (validaciones de kilometraje)
+- ✅ Observer Pattern (alertas automáticas)
+- ✅ Strategy Pattern (estrategias de mantenimiento)
+- ✅ Operaciones CRUD completas
+
+**Ejecución:**
+```bash
+# Importar en Postman Desktop/Web
+1. Importar: docs/postman/Automotive_Fleet_API.postman_collection.json
+2. Importar: docs/postman/Automotive_Environment.postman_environment.json
+3. Activar environment "Automotive - Local Development"
+4. Run Collection
+
+# O usar Newman CLI
+newman run docs/postman/Automotive_Fleet_API.postman_collection.json \
+  -e docs/postman/Automotive_Environment.postman_environment.json
+```
+
+Ver [docs/postman/README.md](docs/postman/README.md) para documentación completa.
+
 ## CI/CD
 
 GitHub Actions ejecuta automáticamente:
