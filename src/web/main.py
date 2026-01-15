@@ -130,7 +130,15 @@ def create_vehicle(request: CreateVehicleRequest):
         HTTPException: 400 if vehicle with same ID already exists
     """
     try:
-        use_case = RegisterVehicleUseCase(vehicle_repository=get_vehicle_repository())
+        use_case = RegisterVehicleUseCase(
+            vehicle_repository=get_vehicle_repository(),
+            alert_repository=get_alert_repository(),
+            strategies=[
+                BasicMaintenanceStrategy(),
+                MajorMaintenanceStrategy(),
+                CriticalThresholdStrategy()
+            ]
+        )
         vehicle = use_case.execute(
             vehicle_id=request.id,
             plate=request.plate,
