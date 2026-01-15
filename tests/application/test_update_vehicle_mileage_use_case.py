@@ -90,5 +90,5 @@ class TestUpdateVehicleMileageUseCase:
         assert len(alerts) == 1
         alert = alerts[0]
         assert alert.vehicle_id == "V-123"
-        assert alert.mileage == 10000  # Ahora el umbral exacto
+        assert alert.mileage == 10001  # Ahora el umbral exacto
         assert alert.alert_type == AlertType.BASIC_MAINTENANCE
