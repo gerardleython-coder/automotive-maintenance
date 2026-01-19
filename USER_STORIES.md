@@ -5,7 +5,7 @@
 **Como** gestor de flota
 **Quiero** que el sistema registre automáticamente el kilometraje de mis vehículos
 **Para** recibir alertas oportunas de mantenimiento preventivo, mayor y crítico
-
+5
 ### Criterios de Aceptación
 
 #### Escenario 1: Registro automático exitoso y generación de alerta
